@@ -1,0 +1,12 @@
+#!/usr/local/bin/ansible-playbook --inventory=inventory
+- name: '{{ name_vendor }} | Koffer | dns-client.yml' 
+  hosts: groups.newinstances 
+  #hosts: lb 
+  become: true
+  vars_files:
+    - 'vars/global.yml'
+  vars:
+    module: "dnsclients"
+    ansible_name_module: "{{ ansible_name }} | {{ module }}"
+  roles:
+    - ipaclient

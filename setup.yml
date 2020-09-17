@@ -1,0 +1,389 @@
+#!/usr/local/bin/ansible-playbook --inventory=inventory
+- name: ' Konductor | Provision UPI Infra | Gather instance facts'
+  hosts: local
+  gather_facts: no
+  tasks:
+    - setup:
+
+- name: ' Konductor | Provision UPI Infra | Build Ovirt Nodes'
+  hosts: local
+  vars:
+    module: "ovirt"
+    state_provider: "local"
+    tf_module_path: "{{ dir_terraform }}/{{ module }}"
+    ansible_name_module: " Konductor | Provision UPI Infra | {{ module }}"
+  vars_files:
+    - vars/global.yml
+  tasks:
+
+    ####### Build a host list for instances to be provisioned 
+    - name: '{{ ansible_name_module }} | add_host | instance list'
+      add_host:
+        groups: newinstances
+        hostname: "{{ item }}"
+        vm_name: "{{ item }}"
+        vm_hostname: "{{ item }}.{{ hostvars[item].dns_search }}"
+        inventory_dir: "{{ hostvars[item].inventory_dir }}"
+        ovirt_url: "{{ hostvars[item].ovirt_url }}"
+        ovirt_username: "{{ hostvars[item].ovirt_username }}"
+        ovirt_password: "{{ hostvars[item].ovirt_password }}"
+        vm_template_id: "{{ hostvars[item].vm_template_id }}"
+        cluster_id: "{{ hostvars[item].cluster_id }}"
+        storage_domain_id: "{{ hostvars[item].storage_domain_id }}"
+        vm_memory: "{{ hostvars[item].vm_memory }}"
+        vm_cpu_cores: "{{ hostvars[item].vm_cpu_cores }}"
+        vm_cpu_sockets: "{{ hostvars[item].vm_cpu_sockets }}"
+        vm_dns_servers: "{{ hostvars[item].dns_servers }}"
+        vm_dns_search: "{{ hostvars[item].dns_search }}"
+        nic_boot_proto: "{{ hostvars[item].nic_boot_proto }}"
+        base_domain: "{{ hostvars[item].base_domain }}"
+        vm_host_subdomain: "{{ hostvars[item].host_subdomain }}"
+        vm_rootpw: "{{ hostvars[item].vm_rootpw }}"
+        vm_user: "{{ hostvars[item].vm_user }}"
+        vm_authorized_ssh_key: "{{ hostvars[item].authorized_ssh_key }}"
+      loop: "{{ groups.all }}"
+
+    ####### Stage Terraform ovirt config for each of the required UPI Infra nodes
+    - name: '{{ ansible_name_module }} | file | Create directories'
+      file:
+        path: "{{ item }}"
+        state: directory
+      loop:
+        - "{{ tf_module_path }}"
+
+    - name: '{{ ansible_name_module }} | copy | Terraform Ovirt Modules'
+      copy:
+        src: "files/modules"
+        dest: "{{ tf_module_path }}"
+        mode: '755'
+       
+    - name: '{{ ansible_name_module }} | template | Terraform Ovirt Provider Vars '
+      template:
+        src: "{{ item.name }}"
+        dest: "{{ item.dest }}"
+        mode: "{{ item.mode }}"
+      loop:
+        - { mode: '755', name: "templates/terraform/provider.tf.j2", dest: "{{ tf_module_path }}/provider.tf"}
+        - { mode: '755', name: "templates/terraform/local.tfstate.j2", dest: "{{ tf_module_path }}/local.tfstate"}
+        - { mode: '755', name: "templates/terraform/variables.tf.j2", dest: "{{ tf_module_path }}/variables.tf"}
+
+    ####### Stage Terraform ovirt config for DHCP Node 
+    - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | DHCP Node'
+      when:
+        - provision_dhcp is defined
+        - provision_dhcp | bool
+      block:
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | DHCP Node | file '
+          file:
+            path: "{{ item }}"
+            state: directory
+          loop:
+            - "{{ tf_module_path }}/dhcp-node"
+            - "{{ tf_module_path }}/dhcp-node-search"
+
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | DHCP Node | instance.auto.tfvars'
+          vars:
+            instance: "{{ item }}"
+          template:
+            src: "templates/terraform/instance.auto.tfvars.j2"
+            dest: "{{ tf_module_path }}/dhcp-node/instance.auto.tfvars"
+            mode: '755'
+          loop: "{{ groups['newinstances'] }}"
+          when:
+            - item in groups['dhcp']
+
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | DHCP Node | instance.tf'
+          vars:
+            instance: "{{ item }}"
+          template:
+            src: "templates/terraform/instance.tf.j2"
+            dest: "{{ tf_module_path }}/dhcp.tf"
+            mode: '755'
+          loop: "{{ groups['newinstances'] }}"
+          when:
+            - item in groups['dhcp']
+
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | DHCP Node | instance-out.tf'
+          vars:
+            instance: "{{ item }}"
+          template:
+            src: "templates/terraform/instance-out.tf.j2"
+            dest: "{{ tf_module_path }}/dhcp-out.tf"
+            mode: '755'
+          loop: "{{ groups['newinstances'] }}"
+          when:
+            - item in groups['dhcp']
+
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | DHCP Node | instance-search.auto.tfvars'
+          vars:
+            instance: "{{ item }}"
+          template:
+            src: "templates/terraform/instance-search.auto.tfvars.j2"
+            dest: "{{ tf_module_path }}/dhcp-node-search/instance-search.auto.tfvars"
+            mode: '755'
+          loop: "{{ groups['newinstances'] }}"
+          when:
+            - item in groups['dhcp']
+
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | DHCP Node | instance-search.tf'
+          vars:
+            instance: "{{ item }}"
+          template:
+            src: "templates/terraform/instance-search.tf.j2"
+            dest: "{{ tf_module_path }}/dhcp-node-search/dhcp-search.tf"
+            mode: '755'
+          loop: "{{ groups['newinstances'] }}"
+          when:
+            - item in groups['dhcp']
+
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | DHCP Node | variables.tf'
+          vars:
+            instance: "{{ item }}"
+          template:
+            src: "templates/terraform/variables-search.tf.j2"
+            dest: "{{ tf_module_path }}/dhcp-node-search/variables.tf"
+            mode: '755'
+          loop: "{{ groups['newinstances'] }}"
+          when:
+            - item in groups['dhcp']
+
+    ####### Stage Terraform ovirt config for DNS Node 
+    - name: '{{ ansible_name_module }} | template | Terraform Vars DNS Node'
+      when:
+        - provision_dns is defined
+        - provision_dns | bool
+      block:
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | DNS Node | file '
+          file:
+            path: "{{ item }}"
+            state: directory
+          loop:
+            - "{{ tf_module_path }}/dns-node"
+            - "{{ tf_module_path }}/dns-node-search"
+
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | DNS Node | instance.auto.tfvars '
+          vars:
+            instance: "{{ item }}"
+          template:
+            src: "templates/terraform/instance.auto.tfvars.j2"
+            dest: "{{ tf_module_path }}/dns-node/instance.auto.tfvars"
+            mode: '755'
+          loop: "{{ groups['newinstances'] }}"
+          when:
+            - item in groups['dns']
+
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | DNS Node | instance.tf '
+          vars:
+            instance: "{{ item }}"
+          template:
+            src: "templates/terraform/instance.tf.j2"
+            dest: "{{ tf_module_path }}/dns.tf"
+            mode: '755'
+          loop: "{{ groups['newinstances'] }}"
+          when:
+            - item in groups['dns']
+
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | DNS Node | instance-out.tf'
+          vars:
+            instance: "{{ item }}"
+          template:
+            src: "templates/terraform/instance-out.tf.j2"
+            dest: "{{ tf_module_path }}/dns-out.tf"
+            mode: '755'
+          loop: "{{ groups['newinstances'] }}"
+          when:
+            - item in groups['dns']
+
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | DNS Node | instance-search.auto.tfvars'
+          vars:
+            instance: "{{ item }}"
+          template:
+            src: "templates/terraform/instance-search.auto.tfvars.j2"
+            dest: "{{ tf_module_path }}/dns-node-search/instance-search.auto.tfvars"
+            mode: '755'
+          loop: "{{ groups['newinstances'] }}"
+          when:
+            - item in groups['dns']
+
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | DNS Node | instance-search.tf'
+          vars:
+            instance: "{{ item }}"
+          template:
+            src: "templates/terraform/instance-search.tf.j2"
+            dest: "{{ tf_module_path }}/dns-node-search/dns-search.tf"
+            mode: '755'
+          loop: "{{ groups['newinstances'] }}"
+          when:
+            - item in groups['dns']
+
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | DNS Node | variables.tf'
+          vars:
+            instance: "{{ item }}"
+          template:
+            src: "templates/terraform/variables-search.tf.j2"
+            dest: "{{ tf_module_path }}/dns-node-search/variables.tf"
+            mode: '755'
+          loop: "{{ groups['newinstances'] }}"
+          when:
+            - item in groups['dns']
+
+    ####### Stage Terraform ovirt config for LB Node 
+    - name: '{{ ansible_name_module }} | template | Terraform Vars LB Node'
+      when:
+        - provision_lb is defined
+        - provision_lb | bool
+      block:
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | LB Node | file '
+          file:
+            path: "{{ item }}"
+            state: directory
+          loop:
+            - "{{ tf_module_path }}/lb-node"
+            - "{{ tf_module_path }}/lb-node-search"
+
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | LB Node | instance.auto.tfvars'
+          vars:
+            instance: "{{ item }}"
+          template:
+            src: "templates/terraform/instance.auto.tfvars.j2"
+            dest: "{{ tf_module_path }}/lb-node/instance.auto.tfvars"
+            mode: '755'
+          loop: "{{ groups['newinstances'] }}"
+          when:
+            - item in groups['lb']
+      
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | LB Node | instance.tf'
+          vars:
+            instance: "{{ item }}"
+          template:
+            src: "templates/terraform/instance.tf.j2"
+            dest: "{{ tf_module_path }}/lb.tf"
+            mode: '755'
+          loop: "{{ groups['newinstances'] }}"
+          when:
+            - item in groups['lb']
+
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | LB Node | instance-out.tf'
+          vars:
+            instance: "{{ item }}"
+          template:
+            src: "templates/terraform/instance-out.tf.j2"
+            dest: "{{ tf_module_path }}/lb-out.tf"
+            mode: '755'
+          loop: "{{ groups['newinstances'] }}"
+          when:
+            - item in groups['lb']
+
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | LB Node | instance-search.auto.tfvars'
+          vars:
+            instance: "{{ item }}"
+          template:
+            src: "templates/terraform/instance-search.auto.tfvars.j2"
+            dest: "{{ tf_module_path }}/lb-node-search/instance-search.auto.tfvars"
+            mode: '755'
+          loop: "{{ groups['newinstances'] }}"
+          when:
+            - item in groups['lb']
+
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | LB Node | instance-search.tf'
+          vars:
+            instance: "{{ item }}"
+          template:
+            src: "templates/terraform/instance-search.tf.j2"
+            dest: "{{ tf_module_path }}/lb-node-search/lb-search.tf"
+            mode: '755'
+          loop: "{{ groups['newinstances'] }}"
+          when:
+            - item in groups['lb']
+
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | LB Node | variables.tf'
+          vars:
+            instance: "{{ item }}"
+          template:
+            src: "templates/terraform/variables-search.tf.j2"
+            dest: "{{ tf_module_path }}/lb-node-search/variables.tf"
+            mode: '755'
+          loop: "{{ groups['newinstances'] }}"
+          when:
+            - item in groups['lb']
+
+    ####### Stage Terraform ovirt config for Registry Node 
+    - name: '{{ ansible_name_module }} | template | Terraform Vars Registry Node'
+      when:
+        - provision_registry is defined
+        - provision_registry | bool
+      block:
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Registry Node | file '
+          file:
+            path: "{{ item }}"
+            state: directory
+          loop:
+            - "{{ tf_module_path }}/registry-node"
+            - "{{ tf_module_path }}/registry-node-search"
+
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Registry Node | instance.auto.tfvars '
+          vars:
+            instance: "{{ item }}"
+          template:
+            src: "templates/terraform/instance.auto.tfvars.j2"
+            dest: "{{ tf_module_path }}/registry-node/instance.auto.tfvars"
+            mode: '755'
+          loop: "{{ groups['newinstances'] }}"
+          when:
+            - item in groups['registry']
+      
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Registry Node | instance.tf '
+          vars:
+            instance: "{{ item }}"
+          template:
+            src: "templates/terraform/instance.tf.j2"
+            dest: "{{ tf_module_path }}/registry.tf"
+            mode: '755'
+          loop: "{{ groups['newinstances'] }}"
+          when:
+            - item in groups['registry']
+      
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Registry Node | instance-out.tf'
+          vars:
+            instance: "{{ item }}"
+          template:
+            src: "templates/terraform/instance-out.tf.j2"
+            dest: "{{ tf_module_path }}/registry-out.tf"
+            mode: '755'
+          loop: "{{ groups['newinstances'] }}"
+          when:
+            - item in groups['registry']
+
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Registry Node | instance-search.auto.tfvars'
+          vars:
+            instance: "{{ item }}"
+          template:
+            src: "templates/terraform/instance-search.auto.tfvars.j2"
+            dest: "{{ tf_module_path }}/registry-node-search/instance-search.auto.tfvars"
+            mode: '755'
+          loop: "{{ groups['newinstances'] }}"
+          when:
+            - item in groups['registry']
+
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Registry Node | instance-search.tf'
+          vars:
+            instance: "{{ item }}"
+          template:
+            src: "templates/terraform/instance-search.tf.j2"
+            dest: "{{ tf_module_path }}/registry-node-search/registry-search.tf"
+            mode: '755'
+          loop: "{{ groups['newinstances'] }}"
+          when:
+            - item in groups['registry']
+
+        - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Registry Node | variables.tf'
+          vars:
+            instance: "{{ item }}"
+          template:
+            src: "templates/terraform/variables-search.tf.j2"
+            dest: "{{ tf_module_path }}/registry-node-search/variables.tf"
+            mode: '755'
+          loop: "{{ groups['newinstances'] }}"
+          when:
+            - item in groups['registry']
+

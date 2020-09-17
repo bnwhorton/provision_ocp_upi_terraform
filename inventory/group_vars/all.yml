@@ -1,0 +1,24 @@
+# Ovirt Cluster Info
+ovirt_url: ''
+ovirt_username: ''
+ovirt_password: ''
+storage_domain_id: ''
+cluster_id: ''
+vm_template_id: ''
+dns_search: ''
+dns_servers: ''
+vm_user: 'root'
+vm_rootpw: '!'
+host_subdomain: ''
+vm_cpu_cores: 1
+vm_cpu_sockets: 1
+vm_memory: 2048
+nic_boot_proto: 'dhcp'
+base_domain: ''
+
+# Vm Instances to build
+provision_dhcp: false
+provision_dns: false
+provision_lb: true
+provision_registry: true
+authorized_ssh_key:

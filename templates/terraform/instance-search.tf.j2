@@ -1,0 +1,19 @@
+provider "ovirt" {
+  url = var.ovirt_url
+  username = var.ovirt_username
+  password = var.ovirt_password
+}
+
+module "{{ instance }}_vms" {
+  source                = "../modules/vm-search"
+  vm_name               = var.vm_name
+  vm_list_name          = var.vm_list_name 
+
+}
+
+output "{{ instance }}_created_vms" {
+  value         = module.{{ instance }}_vms.created_vms
+}
+output "{{ instance }}_reported_devices" {
+  value         = module.{{ instance }}_vms.reported_devices
+}

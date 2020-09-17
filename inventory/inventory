@@ -1,0 +1,29 @@
+[local]
+localhost ansible_connection=local ansible_user=root
+#[masters]
+#ocp-master[1:3] ansible_connection=local ansible_user=core
+#
+#[infras]
+#ocp-infra[1:3] ansible_connection=local ansible_user=core
+#
+#[apps]
+#ocp-app[1:3] ansible_connection=local ansible_user=core
+#
+[lb]
+ocp-lb[1:1] ansible_connection=local ansible_user=root
+
+[registry]
+ocp-regisry[1:1] ansible_connection=local ansible_user=root
+
+[dns]
+ocp-dns[1:1] ansible_connection=local ansible_user=root
+
+[dhcp]
+ocp-dhcp[1:1] ansible_connection=local ansible_user=root
+#
+#[glusterfs]
+#ocp-gluster[1:4]       ansible_connection=local
+
+#[bastion]
+#ocp-bastion     ansible_connection=local
+

@@ -1,0 +1,4 @@
+# Ignore personal file
+*.claude
+*.claude.*
+*.empty

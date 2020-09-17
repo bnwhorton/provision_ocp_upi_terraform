@@ -1,0 +1,25 @@
+#!/usr/local/bin/ansible-playbook --inventory=inventory
+- name: '{{ name_vendor }} | Koffer | loadbalancer.yml' 
+  hosts: dns 
+  vars_files:
+    - 'vars/global.yml'
+    - 'vars/dns.yml'
+  vars:
+    module: "dnsserver"
+    ansible_name_module: " Konductor | Build UPI Infra Resources | {{ module }}"
+  tasks:
+    - name: '{{ ansible_name_module }} | Install and configure IDM if necessary'
+      when:
+        - provision_dns is defined
+        - provision_dns | bool
+      block:
+        - name: '{{ ansible_name_module }} | Install IDM '
+          include_role:
+            name: idm
+          tags: [install,preinstall,installer,firewall,always,result]
+
+        - name: '{{ ansible_name_module }} | Configure IDM'
+          include_role:
+            name: idm
+            tasks_from: post_config
+          tags: [install,preinstall,installer,firewall,always,result]
