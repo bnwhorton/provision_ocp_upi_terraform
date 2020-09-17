@@ -1,6 +1,6 @@
 #!/usr/local/bin/ansible-playbook --inventory=inventory
 - name: '{{ name_vendor }} | Koffer | dhcp.yml' 
-  hosts: dhcp 
+  hosts: newdhcp 
   become: yes
   vars_files:
     - 'vars/global.yml'
