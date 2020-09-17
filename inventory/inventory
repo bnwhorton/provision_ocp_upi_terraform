@@ -13,7 +13,7 @@ localhost ansible_connection=local ansible_user=root
 ocp-lb[1:1] ansible_connection=local ansible_user=root
 
 [registry]
-ocp-regisry[1:1] ansible_connection=local ansible_user=root
+ocp-registry[1:1] ansible_connection=local ansible_user=root
 
 [dns]
 ocp-dns[1:1] ansible_connection=local ansible_user=root
