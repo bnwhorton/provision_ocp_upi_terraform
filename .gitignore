@@ -5,3 +5,12 @@
 .*
 *.crt
 *.repo
+*.retry
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfvars
+.terraformrc
+terraform.rc
+
