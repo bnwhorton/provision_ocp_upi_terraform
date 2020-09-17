@@ -1,0 +1,27 @@
+[newlb]
+{% for key, value in newinstances.items() %}
+{% if 'lb' in key %}
+{{ key }} ansible_host={{ value }} ansible_connection=ssh ansible_user={{ ansible_user }}
+{% endif %}
+{% endfor %}
+
+[newdhcp]
+{% for key, value in newinstances.items() %}
+{% if 'dhcp' in key %}
+{{ key }} ansible_host={{ value }} ansible_connection=ssh ansible_user={{ ansible_user }}
+{% endif %}
+{% endfor %}
+
+[newdns]
+{% for key, value in newinstances.items() %}
+{% if 'dns' in key %}
+{{ key }} ansible_host={{ value }} ansible_connection=ssh ansible_user={{ ansible_user }}
+{% endif %}
+{% endfor %}
+
+[newregistry]
+{% for key, value in newinstances.items() %}
+{% if 'registry' in key %}
+{{ key }} ansible_host={{ value }} ansible_connection=ssh ansible_user={{ ansible_user }}
+{% endif %}
+{% endfor %}

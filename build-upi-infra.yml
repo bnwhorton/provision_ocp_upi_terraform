@@ -9,6 +9,13 @@
   vars_files:
     - vars/global.yml
 
+  pre_tasks:
+    #- name: Ensure the right version of python is installed on host
+    #  become: true
+    #  yum:
+    #    name: python2-jmespath
+    #    state: present
+
   tasks:
     - name: '{{ ansible_name_module }} | find | *-node '
     ####### Find Terraform folders to process 
@@ -84,4 +91,33 @@
       loop: "{{ instance_paths }}"
       ignore_errors: true
       register: tf_apply_lookup
+
+    - name: '{{ ansible_name_module }} | set_fact | Load terraform state files'
+      set_fact:
+        statefiles: "{{ lookup('file', item + '-search/terraform.tfstate') }}"
+      loop: "{{ instance_paths }}"
+      register: statefiles_out
+
+    - name: '{{ ansible_name_module }} | set_fact | Retrieve IP and instance name'
+      set_fact:
+        instance_ips: "{{ statefiles_out | json_query(ipquery) }}"
+        instance_names: "{{ statefiles_out | json_query(namequery) }}"
+        instances: "{{ statefiles_out | json_query(query) }}"
+      vars:
+        ipquery: "results[*].ansible_facts.*.resources[][*].instances[][].attributes.* | [][].reported_devices[?name=='eth0'].ips[][?version=='v4'].address[]"
+        namequery: "results[*].ansible_facts.*.resources[][*].instances[][].attributes.* | [][].name"
+        query: "results[*].ansible_facts.*.resources[][*].instances[][].attributes.* | { name: [][].name, ipaddr: [][].reported_devices[?name=='eth0'].ips[][?version=='v4'].address[]}"
+      register: statejdata_out
+
+    - name: '{{ ansible_name_module }} | set_fact | format data for static inventory format'
+      set_fact:
+        lbs: "{{ dict(instance_names | zip (instance_ips)) }}"
+        newinstances: "{{ dict(instance_names | zip (instance_ips)) }}"
+
+    - name: '{{ ansible_name_module }} | template | process new instance static inventory'
+      template:
+        src: "templates/inventory/instances.j2"
+        dest: "{{ inventory_dir }}/instances"
+        mode: '755'
+
 

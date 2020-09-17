@@ -13,4 +13,4 @@ crash.log
 *.tfvars
 .terraformrc
 terraform.rc
-
+ansible.*
