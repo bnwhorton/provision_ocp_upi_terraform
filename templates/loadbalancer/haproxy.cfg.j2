@@ -69,12 +69,12 @@ backend machine-config-server
 backend kube-api-server
     balance source
     mode tcp
-{% for host in groups['bootstrap'] | d([])%}
+{% for host in groups['bootstrap'] | d([]) and (groups['bootstrap'] | d([]) | length > 0) %}
     server      bootstrap{{ loop.index0 }} {{ host }}:{{ kube_api_port }} check
 {% endfor %}
 
 ### For initial config Masters are not configured as backend 
-{% if 'masters' in groups and groups['masters'] | d([]) %}
+{% if 'masters' in groups and groups['masters'] | d([]) and (groups['masters'] | d([]) | length > 0) %}
 {% for host in groups['masters'] %}
     server      master{{ loop.index0 }} {{ host }}:{{ kube_api_port }} check
 {% endfor %}
@@ -84,12 +84,12 @@ backend kube-api-server
 backend machine-config-server
     balance source
     mode tcp
-{% for host in groups['bootstrap'] | d([]) %}
+{% for host in groups['bootstrap'] | d([]) and (groups['bootstrap'] | d([]) | length > 0) %}
     server      bootstrap{{ loop.index0 }} {{ host }}:{{ machine_config_server_port }} check
 {% endfor %}
 
 ### For initial config Masters are not configured as backend 
-{% if 'masters' in groups and groups['masters'] | d([]) %}
+{% if 'masters' in groups and groups['masters'] | d([]) and (groups['masters'] | d([]) | length > 0) %}
 {% for host in groups['masters'] %}
     server      master{{ loop.index0 }} {{ host }}:{{ machine_config_server_port }} check
 {% endfor %}
@@ -114,7 +114,7 @@ backend ingress-apps-http
     balance source
     mode tcp
 ### For initial config set backend to localhost
-{% if 'workers' not in groups and not groups['workers'] | d([]) %}
+{% if 'workers' not in groups and not groups['workers'] | d([]) and (groups['workers'] | d([]) | length == 0) %}
     server router1 localhost:443 check
 {% else %}
 {% set myindex = 0 %}
@@ -130,7 +130,7 @@ backend ingress-apps-https
     balance source
     mode tcp
 ### For initial config set backend to localhost
-{% if 'workers' not  in groups and not groups['workers'] | d([]) %}
+{% if 'workers' not  in groups and not groups['workers'] | d([]) and (groups['workers'] | d([]) | length == 0) %}
     server router1 localhost:80 check
 {% else %}
 {% set myindex = 0 %}
