@@ -50,7 +50,7 @@ remote_home: "{{ ansible_env.HOME }}"
 registry_auth_file: "{{ dir_secrets }}/docker/config.json }}"
 
 # SSH Keys
-sshkeys_priv_file: "{{ dir_secrets }}/ssh/id_rsa_cluster_deploy"
+sshkeys_priv_file: "{{ local_home }}/.ssh/id_rsa_cluster_deploy"
 sshkeys_priv_string: "{{ lookup('file', '{{ sshkeys_priv_file }}') }}"
 sshkeys_pub_file: "{{ dir_secrets }}/ssh/id_rsa_cluster_deploy.pub"
 sshkeys_pub_string: "{{ lookup('file', '{{ sshkeys_pub_file }}') }}"
@@ -71,3 +71,6 @@ ipaserver_realm: ''
 ipaclient_ca_cert_file: ''
 #ipaclient_hostname: ''
 
+# Load balancer Config
+kube_api_port: 6443
+machine_config_server_port: 22623

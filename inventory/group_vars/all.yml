@@ -22,3 +22,18 @@ provision_dns: false
 provision_lb: true
 provision_registry: true
 authorized_ssh_key:
+
+# Bash ENV Lookups
+local_home: "{{ lookup('env', 'HOME') }}"
+local_user: "{{ lookup('env', 'USER') }}"
+
+# SSH Keys
+sshkeys_priv_file: "{{ local_home }}/.ssh/id_rsa_cluster_deploy"
+sshkeys_priv_string: "{{ lookup('file', '{{ sshkeys_priv_file }}') }}"
+sshkeys_pub_file: "{{ dir_secrets }}/ssh/id_rsa_cluster_deploy.pub"
+sshkeys_pub_string: "{{ lookup('file', '{{ sshkeys_pub_file }}') }}"
+
+# Load balancer Config
+kube_api_port: 6443
+machine_config_server_port: 22623
+

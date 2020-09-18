@@ -1,0 +1,143 @@
+# Global settings
+#---------------------------------------------------------------------
+global
+    maxconn     20000
+    log         /dev/log local0 info
+    chroot      /var/lib/haproxy
+    pidfile     /var/run/haproxy.pid
+    user        haproxy
+    group       haproxy
+    daemon
+
+    # turn on stats unix socket
+    stats socket /var/lib/haproxy/stats
+    ssl-default-bind-ciphers PROFILE=SYSTEM
+    ssl-default-server-ciphers PROFILE=SYSTEM
+
+#---------------------------------------------------------------------
+# common defaults that all the 'listen' and 'backend' sections will
+# use if not designated in their block
+#---------------------------------------------------------------------
+defaults
+    mode                    http
+    log                     global
+    option                  httplog
+    option                  dontlognull
+    option http-server-close
+    option forwardfor       except 127.0.0.0/8
+    option                  redispatch
+    retries                 3
+    timeout http-request    10s
+    timeout queue           1m
+    timeout connect         10s
+    timeout client          300s
+    timeout server          300s
+    timeout http-keep-alive 10s
+    timeout check           10s
+    maxconn                 20000
+
+listen stats :9000
+mode http
+    stats enable
+    stats uri /
+
+### Kubernetes API Server Config
+
+frontend  kube-api-server
+    bind *:{{ kube_api_port }}
+    default_backend kube-api-server
+    mode tcp
+    option tcplog
+
+backend kube-api-server
+    balance source
+    mode tcp
+
+### Kubernetes Machine Config Server
+
+frontend  machine-config-server
+    bind *:{{ machine_config_server_port }}
+    default_backend machine-config-server
+    mode tcp
+    option tcplog
+
+backend machine-config-server
+    balance source
+    mode tcp
+
+### Kubernetes API Server Backend Config
+backend kube-api-server
+    balance source
+    mode tcp
+{% for host in groups['bootstrap'] %}
+    server      bootstrap{{ loop.index0 }} {{ host }}:{{ kube_api_port }} check
+{% endfor %}
+
+### For initial config Masters are not configured as backend 
+{% if 'masters' in groups and groups['masters'] | d([]) %}
+{% for host in groups['masters'] %}
+    server      master{{ loop.index0 }} {{ host }}:{{ kube_api_port }} check
+{% endfor %}
+{% endif %}
+
+### Kubernetes Machine Config Server Backend Config
+backend machine-config-server
+    balance source
+    mode tcp
+{% for host in groups['bootstrap'] %}
+    server      bootstrap{{ loop.index0 }} {{ host }}:{{ machine_config_server_port }} check
+{% endfor %}
+
+### For initial config Masters are not configured as backend 
+{% if 'masters' in groups and groups['masters'] | d([]) %}
+{% for host in groups['masters'] %}
+    server      master{{ loop.index0 }} {{ host }}:{{ machine_config_server_port }} check
+{% endfor %}
+{% endif %}
+
+
+### OpenShift Ingress Config
+frontend  ingress-apps-http
+    bind  *:80
+    mode tcp
+    option tcplog
+    default_backend ingress-apps-http
+
+frontend  ingress-apps-https
+    bind  *:443
+    mode tcp
+    option tcplog
+    default_backend ingress-apps-https
+
+### OpenShift Ingress Backend Config
+backend ingress-apps-http
+    balance source
+    mode tcp
+### For initial config set backend to localhost
+{% if 'workers' not in groups and not groups['workers'] | d([]) %}
+    server router1 localhost:443 check
+{% else %}
+{% set myindex = 0 %}
+{% for node in groups['workers'] %}
+#{% if hostvars[node].openshift_node_group_name == 'node-config-infra' %}
+    server router{{ myindex }} {{ node }}:80 check
+{% set myindex = myindex + 1 %}
+#{% endif %}
+{% endfor %}
+{% endif %}
+
+backend ingress-apps-https
+    balance source
+    mode tcp
+### For initial config set backend to localhost
+{% if 'workers' not  in groups and not groups['workers'] | d([]) %}
+    server router1 localhost:80 check
+{% else %}
+{% set myindex = 0 %}
+{% for node in groups['workers'] %}
+#{% if hostvars[node].openshift_node_group_name == 'node-config-infra' %}
+    server router{{ myindex }} {{ node }}:80 check
+{% set myindex = myindex + 1 %}
+#{% endif %}
+{% endfor %}
+{% endif %}

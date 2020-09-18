@@ -14,3 +14,5 @@ crash.log
 .terraformrc
 terraform.rc
 ansible.*
+inventory/group_vars/all.yml
+vars/global.yml

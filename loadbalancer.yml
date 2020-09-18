@@ -1,6 +1,7 @@
 #!/usr/local/bin/ansible-playbook --inventory=inventory
 - name: ' Konductor | Provision UPI Infra  | loadbalancer.yml' 
   hosts: newlb
+  become: true
   vars_files:
     - 'vars/global.yml'
   vars:
@@ -19,8 +20,8 @@
 
         - name: '{{ ansible_name_module }} | copy LB config template into place'
           template:
-            src: ./templates/haproxy.cfg.j2
-            dest: /etc/haproxy/haproxy.cfg
+            src: "templates/loadbalancer/haproxy.cfg.j2"
+            dest: "/etc/haproxy/haproxy.cfg"
           register: haproxycfg_copied
 
         - name: '{{ ansible_name_module }} | Ensure the firewall-cmd is installed'
@@ -40,11 +41,12 @@
             permanent: yes
             zone: public
             immediate: yes
-            state: yes
+            state: enabled
           loop:
             - 6443/tcp
             - 22623/tcp
             - 443/tcp
+            - 80/tcp
 
         - name: '{{ ansible_name_module }} | Enable appropriates port on internal zone'
           firewalld:
@@ -52,11 +54,12 @@
             permanent: yes
             zone: internal
             immediate: yes
-            state: yes
+            state: enabled
           loop:
             - 6443/tcp
             - 22623/tcp
             - 443/tcp
+            - 80/tcp
 
         - name: '{{ ansible_name_module }} | Restart the HAProxy service'
           systemd:
