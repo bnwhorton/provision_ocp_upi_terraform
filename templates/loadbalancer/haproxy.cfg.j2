@@ -69,7 +69,7 @@ backend machine-config-server
 backend kube-api-server
     balance source
     mode tcp
-{% for host in groups['bootstrap'] %}
+{% for host in groups['bootstrap'] | d([])%}
     server      bootstrap{{ loop.index0 }} {{ host }}:{{ kube_api_port }} check
 {% endfor %}
 
@@ -84,7 +84,7 @@ backend kube-api-server
 backend machine-config-server
     balance source
     mode tcp
-{% for host in groups['bootstrap'] %}
+{% for host in groups['bootstrap'] | d([]) %}
     server      bootstrap{{ loop.index0 }} {{ host }}:{{ machine_config_server_port }} check
 {% endfor %}
 
