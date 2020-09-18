@@ -40,7 +40,7 @@
         vm_host_subdomain: "{{ hostvars[item].host_subdomain }}"
         vm_rootpw: "{{ hostvars[item].vm_rootpw }}"
         vm_user: "{{ hostvars[item].vm_user }}"
-        vm_authorized_ssh_key: "{{ hostvars[item].authorized_ssh_key }}"
+        vm_authorized_ssh_key: "{{ hostvars[item].sshkeys_pub_string }}"
       loop: "{{ groups.all }}"
 
     ####### Stage Terraform ovirt config for each of the required UPI Infra nodes
