@@ -12,8 +12,9 @@ localhost ansible_connection=local ansible_user=root
 #
 #[workers]
 #ocp-worker[1:1] ansible_connection=local ansible_user=root
-#[lb]
-#ocp-lb[1:1] ansible_connection=local ansible_user=root
+
+[lb]
+ocp-lb[1:1] ansible_connection=local ansible_user=root
 
 [registry]
 ocp-registry[1:1] ansible_connection=local ansible_user=root
