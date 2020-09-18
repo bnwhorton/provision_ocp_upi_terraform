@@ -120,4 +120,17 @@
         dest: "{{ inventory_dir }}/instances"
         mode: '755'
 
-
+    - name: '{{ ansible_name_module }} | add_host | create in memory host group to run subsequent plays'
+      add_host:
+        name: "{{ item.key }}"
+        groups: 
+          - "{{ 'new' + (item.key.split('-')[1] | regex_replace('\\d','')) }}"
+          - "newinstances"
+        ansible_user: "{{ ansible_user }}"
+        ansible_sudo_pass: "{{ vm_rootpw }}"
+        ansible_become_pass: "{{ vm_rootpw }}"
+        ansible_ssh_pass: "{{ vm_rootpw }}"
+        instance_name: "{{ item.key }}"
+        ansible_host: "{{ item.value }}"
+        ansible_connection: 'ssh'
+      loop: "{{ newinstances | dict2items }}"
