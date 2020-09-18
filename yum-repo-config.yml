@@ -1,6 +1,6 @@
 #!/usr/local/bin/ansible-playbook --inventory=inventory
 - name: ' Konductor | Provision UPI Infra | yum-repo-config.yml' 
-  hosts: groups.newinstances 
+  hosts: newinstances 
   become: yes
   vars_files:
     - 'vars/global.yml'
