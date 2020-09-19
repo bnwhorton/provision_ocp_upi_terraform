@@ -1,5 +1,5 @@
-[local]
-localhost ansible_connection=local ansible_user=root
+#Only define hosts that need to be created as we rely on the definition to create the hosts
+# and keep the code clean instead of full of boolean to trigger the provisioning
 #[masters]
 #ocp-master[1:3] ansible_connection=local ansible_user=core
 #
@@ -20,10 +20,10 @@ ocp-lb[1:1] ansible_connection=local ansible_user=root
 ocp-registry[1:1] ansible_connection=local ansible_user=root
 
 [dns]
-ocp-dns[1:1] ansible_connection=local ansible_user=root
+#ocp-dns[1:1] ansible_connection=local ansible_user=root
 
 [dhcp]
-ocp-dhcp[1:1] ansible_connection=local ansible_user=root
+#ocp-dhcp[1:1] ansible_connection=local ansible_user=root
 
 #[bootstrap]
 #ocp-bootstrap[1:1] ansible_connection=local ansible_user=root

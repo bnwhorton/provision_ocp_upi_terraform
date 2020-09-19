@@ -1,6 +1,6 @@
 #!/usr/local/bin/ansible-playbook --inventory=inventory
 - name: ' Konductor | Provision-upi-infra | Build Infra Resources'
-  hosts: local
+  hosts: localhost
   vars:
     module: "provision-ovirt"
     state_provider: "local"
@@ -70,7 +70,7 @@
 
     - name: '{{ ansible_name_module }} | command | wait for all vms to be created before running next tasks'
       wait_for:
-        timeout: 300
+        timeout: 600
       delegate_to: localhost
 
     - name: '{{ ansible_name_module }} | command | terraform | init | vm search'
