@@ -15,6 +15,8 @@ vm_cpu_sockets: 1
 vm_memory: 2048
 nic_boot_proto: 'dhcp'
 base_domain: ''
+additional_disks: []
+attach_additional_disks: true
 
 # Vm Instances to build
 provision_dhcp: false

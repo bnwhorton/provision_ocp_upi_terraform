@@ -11,6 +11,8 @@ dns_servers:
 vm_user:
 vm_rootpw:
 host_subdomain:
+additional_disks: []
+attach_additional_disks: true
 
 # Vm Instances to build
 provision_dhcp: false
