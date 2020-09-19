@@ -22,6 +22,8 @@
           template:
             src: "templates/loadbalancer/haproxy.cfg.j2"
             dest: "/etc/haproxy/haproxy.cfg"
+            force: yes
+            backup: yes
           register: haproxycfg_copied
 
         - name: '{{ ansible_name_module }} | Ensure the firewall-cmd is installed'
