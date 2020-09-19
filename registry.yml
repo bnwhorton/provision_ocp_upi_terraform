@@ -1,6 +1,7 @@
 #!/usr/local/bin/ansible-playbook --inventory=inventory
 - name: ' Konductor | Provision UPI Infra | registry.yml' 
-  hosts: newlb
+  hosts: newregistry
+  become: yes
   vars_files:
     - 'vars/global.yml'
   vars:
@@ -12,7 +13,7 @@
         - provision_registry is defined
         - provision_registry | bool
       block:
-        - name: '{{ ansible_name_module }} | Import LB installation role'
+        - name: '{{ ansible_name_module }} | Import Registry installation role'
           include_role:
             name: registry 
           register: registry_installed
