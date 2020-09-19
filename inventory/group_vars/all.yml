@@ -21,7 +21,11 @@ provision_dhcp: false
 provision_dns: false
 provision_lb: true
 provision_registry: true
-authorized_ssh_key:
+authorized_ssh_key: "{{ sshkeys_pub_string }}" 
+
+#Vm to skip
+vm_skip_list:
+  - localhost
 
 # Bash ENV Lookups
 local_home: "{{ lookup('env', 'HOME') }}"
@@ -36,4 +40,13 @@ sshkeys_pub_string: "{{ lookup('file', '{{ sshkeys_pub_file }}') }}"
 # Load balancer Config
 kube_api_port: 6443
 machine_config_server_port: 22623
+
+# Registry Config
+registry_host_fqdn:
+registry_secret: ''
+registry_admin_username: ''
+registry_admin_password: ''
+secure_registry: false
+enable_authz_on_registry: true
+generate_selfsigned_registry_certfiles: false
 
