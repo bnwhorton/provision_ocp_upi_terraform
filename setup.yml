@@ -1,6 +1,7 @@
 #!/usr/local/bin/ansible-playbook --inventory=inventory
 - name: ' Konductor | Provision UPI Infra | Gather instance facts'
-  hosts: localhost
+  hosts: local
+  #hosts: localhost
   gather_facts: no
   tasks:
     - setup:
@@ -76,6 +77,8 @@
         path: "{{ tf_module_path }}/{{ dir_name_prefix }}{{ dir_name_suffix }}" 
         state: directory
       loop: "{{ groups['infrainstances'] }}"
+      when:
+        - item not in vm_skip_list
 
     - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Node file | -node-search directory'
       vars:
@@ -85,6 +88,8 @@
         path: "{{ tf_module_path }}/{{ dir_name_prefix }}{{ dir_name_suffix }}" 
         state: directory
       loop: "{{ groups['infrainstances'] }}"
+      when:
+        - item not in vm_skip_list
 
 
     - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Node file | instance.auto.tfvars'
@@ -97,6 +102,8 @@
         dest: "{{ tf_module_path }}/{{ dir_name_prefix }}{{ dir_name_suffix }}/instance.auto.tfvars"
         mode: '755'
       loop: "{{ groups['infrainstances'] }}"
+      when:
+        - item not in vm_skip_list
 
     - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Node file | instance.tf'
       vars:
@@ -107,6 +114,8 @@
         dest: "{{ tf_module_path }}/{{ file_name }}.tf"
         mode: '755'
       loop: "{{ groups['infrainstances'] }}"
+      when:
+        - item not in vm_skip_list
 
     - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Node file | instance-out.tf'
       vars:
@@ -118,6 +127,8 @@
         dest: "{{ tf_module_path }}/{{ file_name }}{{ file_name_suffix }}.tf"
         mode: '755'
       loop: "{{ groups['infrainstances'] }}"
+      when:
+        - item not in vm_skip_list
 
     - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Node file | instance-search.auto.tfvars'
       vars:
@@ -129,6 +140,8 @@
         dest: "{{ tf_module_path }}/{{ dir_name_prefix }}{{ dir_name_suffix }}/instance-search.auto.tfvars"
         mode: '755'
       loop: "{{ groups['infrainstances'] }}"
+      when:
+        - item not in vm_skip_list
 
     - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Node file | instance-search.tf'
       vars:
@@ -142,6 +155,8 @@
         dest: "{{ tf_module_path }}/{{ dir_name_prefix }}{{ dir_name_suffix }}/{{ file_name }}{{ file_name_suffix }}.tf"
         mode: '755'
       loop: "{{ groups['infrainstances'] }}"
+      when:
+        - item not in vm_skip_list
 
     - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Node file | variables.tf'
       vars:
@@ -153,4 +168,6 @@
         dest: "{{ tf_module_path }}/{{ dir_name_prefix }}{{ dir_name_suffix }}/variables.tf"
         mode: '755'
       loop: "{{ groups['infrainstances'] }}"
+      when:
+        - item not in vm_skip_list
 

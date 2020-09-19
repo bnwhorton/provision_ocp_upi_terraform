@@ -1,6 +1,7 @@
 #!/usr/local/bin/ansible-playbook --inventory=inventory
 - name: ' Konductor | Provision-upi-infra | Build Infra Resources'
-  hosts: localhost
+  hosts: local
+  #hosts: localhost
   vars:
     module: "provision-ovirt"
     state_provider: "local"
@@ -17,6 +18,8 @@
     #    state: present
 
   tasks:
+    - setup:
+
     - name: '{{ ansible_name_module }} | find | *-node '
     ####### Find Terraform folders to process 
       find:
@@ -102,16 +105,13 @@
       set_fact:
         instance_ips: "{{ statefiles_out | json_query(ipquery) }}"
         instance_names: "{{ statefiles_out | json_query(namequery) }}"
-        instances: "{{ statefiles_out | json_query(query) }}"
       vars:
         ipquery: "results[*].ansible_facts.*.resources[][*].instances[][].attributes.* | [][].reported_devices[?name=='eth0'].ips[][?version=='v4'].address[]"
         namequery: "results[*].ansible_facts.*.resources[][*].instances[][].attributes.* | [][].name"
-        query: "results[*].ansible_facts.*.resources[][*].instances[][].attributes.* | { name: [][].name, ipaddr: [][].reported_devices[?name=='eth0'].ips[][?version=='v4'].address[]}"
       register: statejdata_out
 
     - name: '{{ ansible_name_module }} | set_fact | format data for static inventory format'
       set_fact:
-        lbs: "{{ dict(instance_names | zip (instance_ips)) }}"
         newinstances: "{{ dict(instance_names | zip (instance_ips)) }}"
 
     - name: '{{ ansible_name_module }} | template | process new instance static inventory'
