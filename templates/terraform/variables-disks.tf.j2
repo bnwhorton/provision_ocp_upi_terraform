@@ -1,0 +1,22 @@
+{% if hostvars[instance]['additional_disks'] | d([]) | length > 0 and hostvars[instance]['attach_additional_disks'] | d(false) | bool %}
+{% set dindex = 0 %}
+{% for disk in hostvars[instance]['additional_disks'] %}
+variable "{{ instance}}-disk_name{{ dindex }}" { default =  "" }
+variable "{{ instance }}-disk_size{{ dindex }}" {
+  type    = number
+  default =  "30"
+}
+{% set dindex = dindex + 1 %}
+{% endfor %}
+variable "disk_format" { default =  "cow" }
+variable "sparse" { default =  "true" }
+variable "shareable" { default =  "true" }
+
+variable "active" { default =  "true" }
+variable "bootable" { default =  "false" }
+variable "interface" { default =  "virtio_scsi" }
+variable "read_only" { default =  "false" }
+variable "use_scsi_reservation" { default =  "false" }
+
+{% endif %}
+

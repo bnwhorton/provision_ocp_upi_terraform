@@ -11,3 +11,13 @@ vm_dns_servers = "{{ hostvars[instance]['dns_servers'] }}"
 vm_memory = "{{ hostvars[instance]['vm_memory'] | int }}" 
 vm_cpu_cores = "{{ hostvars[instance]['vm_cpu_cores'] | int }}"
 vm_template_id = "{{ hostvars[instance]['vm_template_id'] }}"
+
+{% if hostvars[instance]['additional_disks'] | d([]) | length > 0 and hostvars[instance]['attach_additional_disks'] | d(false) | bool %}
+{% set dindex = 0 %}
+{% for disk in hostvars[instance]['additional_disks'] %}
+{{ instance }}-disk_name{{ dindex }} = "{{ disk.name}}"
+{{ instance }}-disk_size{{ dindex }} = "{{ disk.size }}"
+{% set dindex = dindex + 1 %}
+{% endfor %}
+
+{% endif %}

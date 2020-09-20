@@ -42,6 +42,8 @@
         vm_rootpw: "{{ hostvars[item].vm_rootpw }}"
         vm_user: "{{ hostvars[item].vm_user }}"
         vm_authorized_ssh_key: "{{ hostvars[item].sshkeys_pub_string }}"
+        attach_additional_disks: "{{ hostvars[item].attach_additional_disks | d(false) }}"
+        additional_disks: "{{ hostvars[item].additional_disks | d([]) }}"
       loop: "{{ groups.all }}"
 
     ####### Stage Terraform ovirt config for each of the required UPI Infra nodes
@@ -87,6 +89,20 @@
       file:
         path: "{{ tf_module_path }}/{{ dir_name_prefix }}{{ dir_name_suffix }}" 
         state: directory
+      loop: "{{ groups['infrainstances'] }}"
+      when:
+        - item not in vm_skip_list
+
+
+    - name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars |  Node file | disk variables'
+      vars:
+        dir_name_prefix: "{{ item.split('-')[1] | regex_replace('\\d', '') }}"
+        dir_name_suffix: "-node"
+        instance: "{{ item }}"
+      template:
+        src: "templates/terraform/variables-disks.tf.j2"
+        dest: "{{ tf_module_path }}/variables-{{ item }}-disks.tf"
+        mode: '755'
       loop: "{{ groups['infrainstances'] }}"
       when:
         - item not in vm_skip_list

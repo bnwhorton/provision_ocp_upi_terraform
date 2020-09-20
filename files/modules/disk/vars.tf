@@ -1,15 +1,15 @@
 # Disk Resource variables
-variable "name" {
+variable "disk_name" {
   default = ""
 }
-variable "size" {
+variable "disk_size" {
   default = "30"
 }
-variable "format" {
+variable "disk_format" {
   default = "cow"
 }
 variable "storage_domain_id" {
-  default ""
+  default = ""
 }
 variable "sparse" {
   default = "true" 
@@ -20,9 +20,6 @@ variable "shareable" {
 
 # Disk Attachment variables
 variable "vm_id" {
-  default = ""
-}
-variable "disk_id" {
   default = ""
 }
 variable "active" {
