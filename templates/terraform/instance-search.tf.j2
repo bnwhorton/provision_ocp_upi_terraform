@@ -17,3 +17,6 @@ output "{{ instance }}_created_vms" {
 output "{{ instance }}_reported_devices" {
   value         = module.{{ instance }}_vms.reported_devices
 }
+output "{{ instance }}_created_vm_id" {
+  value         = module.{{ instance }}_vms.created_vm_id
+}

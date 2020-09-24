@@ -58,7 +58,7 @@ variable "vm_dns_search" {
 }
 variable "vm_dns_servers" {
   description = "The DNS server to configure for the VM if applicable"
-  default     = "192.168.5.50"
+  default     = ""
 }
 
 # Initialization - NIC Configuration

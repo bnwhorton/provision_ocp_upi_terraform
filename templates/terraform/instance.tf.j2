@@ -11,19 +11,3 @@ module "{{ instance }}" {
   vm_template_id	= var.vm_template_id
 } 
 
-{% if hostvars[instance]['additional_disks'] | d([]) | length > 0 and hostvars[instance]['attach_additional_disks'] | d(false) | bool %}
-{% set dindex = 0 %}
-{% for disk in hostvars[instance]['additional_disks'] %}
-
-module "{{ instance }}-{{ disk.name }}" {
-  source		= "./modules/disk"
-  storage_domain_id	= var.storage_domain_id
-  disk_name		= var.{{ instance }}-disk_name{{ dindex }}
-  disk_size		= var.{{ instance}}-disk_size{{ dindex }}
-  disk_format           = var.disk_format
-  vm_id			= module.{{ instance }}.id 
-  bootable		= var.bootable
-} 
-{% set dindex = dindex + 1 %}
-{% endfor %}
-{% endif %}
