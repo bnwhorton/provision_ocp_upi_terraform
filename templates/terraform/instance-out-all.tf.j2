@@ -1,0 +1,20 @@
+
+{% for instance in groups['infrainstances'] %}
+{% if not instance in vm_skip_list %}
+output "{{ instance }}_id" {
+  value		= module.upi_infra_vms.id
+}
+
+{% if hostvars[instance]['additional_disks'] | d([]) | length > 0 and hostvars[instance]['attach_additional_disks'] | d(false) | bool %}
+
+{% for disk in hostvars[instance]['additional_disks'] %}
+output "{{ instance }}-{{ disk.name }}_id" {
+  value         = module.upi_infra_vms.disk_id
+}
+{% endfor %}
+{% endif %}
+
+
+{% endif %}
+
+{% endfor %}
