@@ -1,0 +1,111 @@
+---
+# tasks file for setup-terraform-module
+####### Build a host list for instances to be provisioned 
+- name: '{{ ansible_name_module }} | add_host | instance list'
+  add_host:
+    groups: infrainstances
+    hostname: "{{ item }}"
+    vm_name: "{{ item }}"
+    vm_hostname: "{{ item }}.{{ hostvars[item].dns_search }}"
+    inventory_dir: "{{ hostvars[item].inventory_dir }}"
+    ovirt_url: "{{ hostvars[item].ovirt_url }}"
+    ovirt_username: "{{ hostvars[item].ovirt_username }}"
+    ovirt_password: "{{ hostvars[item].ovirt_password }}"
+    vm_template_id: "{{ hostvars[item].vm_template_id }}"
+    cluster_id: "{{ hostvars[item].cluster_id }}"
+    storage_domain_id: "{{ hostvars[item].storage_domain_id }}"
+    vm_memory: "{{ hostvars[item].vm_memory }}"
+    vm_cpu_cores: "{{ hostvars[item].vm_cpu_cores }}"
+    vm_cpu_sockets: "{{ hostvars[item].vm_cpu_sockets }}"
+    vm_dns_servers: "{{ hostvars[item].dns_servers }}"
+    vm_dns_search: "{{ hostvars[item].dns_search }}"
+    nic_boot_proto: "{{ hostvars[item].nic_boot_proto }}"
+    base_domain: "{{ hostvars[item].base_domain }}"
+    vm_host_subdomain: "{{ hostvars[item].host_subdomain }}"
+    vm_host_subdomain: "{{ hostvars[item].host_subdomain }}"
+    vm_rootpw: "{{ hostvars[item].vm_rootpw }}"
+    vm_user: "{{ hostvars[item].vm_user }}"
+    vm_authorized_ssh_key: "{{ hostvars[item].sshkeys_pub_string }}"
+    attach_additional_disks: "{{ hostvars[item].attach_additional_disks | d(false) }}"
+    additional_disks: "{{ hostvars[item].additional_disks | d([]) }}"
+  loop: "{{ groups.all }}"
+
+####### Stage Terraform ovirt config for each of the required UPI Infra nodes
+- name: '{{ ansible_name_module }} | file | Create directories'
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ tf_module_path }}"
+
+- name: '{{ ansible_name_module }} | copy | Terraform Ovirt Modules'
+  copy:
+    src: "files/modules"
+    dest: "{{ tf_module_path }}"
+    mode: '755'
+
+- name: '{{ ansible_name_module }} | template | Terraform Ovirt Provider Vars '
+  template:
+    src: "{{ item.name }}"
+    dest: "{{ item.dest }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - { mode: '755', name: "templates/terraform/provider.tf.j2", dest: "{{ tf_module_path }}/provider.tf"}
+    - { mode: '755', name: "templates/terraform/local.tfstate.j2", dest: "{{ tf_module_path }}/local.tfstate"}
+    - { mode: '755', name: "templates/terraform/variables-all.tf.j2", dest: "{{ tf_module_path }}/variables.tf"}
+    - { mode: '755', name: "templates/terraform/instance-all.auto.tfvars.j2", dest: "{{ tf_module_path }}/instance-all.auto.tfvars"}
+    - { mode: '755', name: "templates/terraform/instance-all.tf.j2", dest: "{{ tf_module_path }}/instance-all.tf"}
+    - { mode: '755', name: "templates/terraform/instance-out-all.tf.j2", dest: "{{ tf_module_path }}/instance-out-all.tf"}
+
+####### Stage Terraform ovirt config for Nodes 
+- name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Node file | -node-search directory'
+  vars:
+    dir_name_prefix: "{{ item.split('-')[1] | regex_replace('\\d', '') }}"
+    dir_name_suffix: "-node-search"
+  file:
+    path: "{{ tf_module_path }}/{{ dir_name_prefix }}{{ dir_name_suffix }}"
+    state: directory
+  loop: "{{ groups['infrainstances'] }}"
+  when:
+    - item not in vm_skip_list
+
+- name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Node file | instance-search.auto.tfvars'
+  vars:
+    dir_name_prefix: "{{ item.split('-')[1] | regex_replace('\\d', '') }}"
+    dir_name_suffix: "-node-search"
+    instance: "{{ item }}"
+  template:
+    src: "templates/terraform/instance-search.auto.tfvars.j2"
+    dest: "{{ tf_module_path }}/{{ dir_name_prefix }}{{ dir_name_suffix }}/instance-search.auto.tfvars"
+    mode: '755'
+  loop: "{{ groups['infrainstances'] }}"
+  when:
+    - item not in vm_skip_list
+
+- name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Node file | instance-search.tf'
+  vars:
+    dir_name_prefix: "{{ item.split('-')[1] | regex_replace('\\d', '') }}"
+    dir_name_suffix: "-node-search"
+    file_name: "{{ item.split('-')[1] | regex_replace('\\d', '') }}"
+    file_name_suffix: "-search"
+    instance: "{{ item }}"
+  template:
+    src: "templates/terraform/instance-search.tf.j2"
+    dest: "{{ tf_module_path }}/{{ dir_name_prefix }}{{ dir_name_suffix }}/{{ file_name }}{{ file_name_suffix }}.tf"
+    mode: '755'
+  loop: "{{ groups['infrainstances'] }}"
+  when:
+    - item not in vm_skip_list
+- name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Node file | variables.tf'
+  vars:
+    dir_name_prefix: "{{ item.split('-')[1] | regex_replace('\\d', '') }}"
+    dir_name_suffix: "-node-search"
+    instance: "{{ item }}"
+  template:
+    src: "templates/terraform/variables-search.tf.j2"
+    dest: "{{ tf_module_path }}/{{ dir_name_prefix }}{{ dir_name_suffix }}/variables.tf"
+    mode: '755'
+  loop: "{{ groups['infrainstances'] }}"
+  when:
+    - item not in vm_skip_list
+

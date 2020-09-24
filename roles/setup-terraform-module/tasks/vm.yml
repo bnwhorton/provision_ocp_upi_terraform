@@ -1,0 +1,215 @@
+---
+# tasks file for setup-terraform-module
+####### Stage Terraform ovirt config for Nodes 
+### This is the way to setup node when not creating additional disks or when only creating a single additional disks
+### The default main is better 
+####### Stage Terraform ovirt config for each of the required UPI Infra nodes
+- name: '{{ ansible_name_module }} | file | Create directories'
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ tf_module_path }}"
+
+- name: '{{ ansible_name_module }} | copy | Terraform Ovirt Modules'
+  copy:
+    src: "files/modules"
+    dest: "{{ tf_module_path }}"
+    mode: '755'
+
+- name: '{{ ansible_name_module }} | template | Terraform Ovirt Provider Vars '
+  template:
+    src: "{{ item.name }}"
+    dest: "{{ item.dest }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - { mode: '755', name: "templates/terraform/provider.tf.j2", dest: "{{ tf_module_path }}/provider.tf"}
+    - { mode: '755', name: "templates/terraform/local.tfstate.j2", dest: "{{ tf_module_path }}/local.tfstate"}
+    - { mode: '755', name: "templates/terraform/variables.tf.j2", dest: "{{ tf_module_path }}/variables.tf"}
+
+- name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars |  Node file | -node directory'
+  vars:
+    dir_name_prefix: "{{ item.split('-')[1] | regex_replace('\\d', '') }}"
+    dir_name_suffix: "-node"
+  file:
+    path: "{{ tf_module_path }}/{{ dir_name_prefix }}{{ dir_name_suffix }}" 
+    state: directory
+  loop: "{{ groups['infrainstances'] }}"
+  when:
+    - item not in vm_skip_list
+
+- name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Node file | -node-disks directory'
+  vars:
+    dir_name_prefix: "{{ item.split('-')[1] | regex_replace('\\d', '') }}"
+    dir_name_suffix: "-node-disks"
+  file:
+    path: "{{ tf_module_path }}/{{ dir_name_prefix }}{{ dir_name_suffix }}" 
+    state: directory
+  loop: "{{ groups['infrainstances'] }}"
+  when:
+    - item not in vm_skip_list
+    - hostvars[item]['additional_disks'] | d([]) | length > 0
+    - hostvars[item]['attach_additional_disks'] | d(false) | bool 
+
+- name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Node file | instance.auto.tfvars'
+  vars:
+    dir_name_prefix: "{{ item.split('-')[1] | regex_replace('\\d', '') }}"
+    dir_name_suffix: "-node"
+    instance: "{{ item }}"
+  template:
+    src: "templates/terraform/instance.auto.tfvars.j2"
+    dest: "{{ tf_module_path }}/{{ dir_name_prefix }}{{ dir_name_suffix }}/instance.auto.tfvars"
+    mode: '755'
+  loop: "{{ groups['infrainstances'] }}"
+  when:
+    - item not in vm_skip_list
+
+- name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Node file | instance.tf'
+  vars:
+    file_name: "{{ item.split('-')[1] | regex_replace('\\d', '') }}"
+    instance: "{{ item }}"
+  template:
+    src: "templates/terraform/instance.tf.j2"
+    dest: "{{ tf_module_path }}/{{ file_name }}.tf"
+    mode: '755'
+  loop: "{{ groups['infrainstances'] }}"
+  when:
+    - item not in vm_skip_list
+
+- name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Node file | instance-out.tf'
+  vars:
+    file_name: "{{ item.split('-')[1] | regex_replace('\\d', '') }}"
+    file_name_suffix: "-out"
+    instance: "{{ item }}"
+  template:
+    src: "templates/terraform/instance-out.tf.j2"
+    dest: "{{ tf_module_path }}/{{ file_name }}{{ file_name_suffix }}.tf"
+    mode: '755'
+  loop: "{{ groups['infrainstances'] }}"
+  when:
+    - item not in vm_skip_list
+- name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars |  Node file | disk variables'
+  vars:
+    file_name_prefix: "variables-"
+    file_name_suffix: "-disks"
+    dir_name_prefix: "{{ item.split('-')[1] | regex_replace('\\d', '') }}"
+    dir_name_suffix: "-node-disks"
+    instance: "{{ item }}"
+  template:
+    src: "templates/terraform/variables-disks.tf.j2"
+    dest: "{{ tf_module_path }}/{{ dir_name_prefix }}{{ dir_name_suffix }}/{{ file_name_prefix }}{{ item }}{{ file_name_suffix }}.tf"
+    #dest: "{{ tf_module_path }}/{{ file_name_prefix }}{{ item }}{{ file_name_suffix }}.tf"
+    mode: '755'
+  loop: "{{ groups['infrainstances'] }}"
+  when:
+    - item not in vm_skip_list
+    - hostvars[item]['additional_disks'] | d([]) | length > 0
+    - hostvars[item]['attach_additional_disks'] | d(false) | bool 
+
+- name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars |  Node file | disk attachment variables'
+  vars:
+    file_name_prefix: "variables-"
+    file_name_suffix: "-disks-attachment"
+    dir_name_prefix: "{{ item.split('-')[1] | regex_replace('\\d', '') }}"
+    dir_name_suffix: "-node-disks"
+    instance: "{{ item }}"
+  template:
+    src: "templates/terraform/variables-disks-attachment.tf.j2"
+    dest: "{{ tf_module_path }}/{{ dir_name_prefix }}{{ dir_name_suffix }}/{{ file_name_prefix }}{{ item }}{{ file_name_suffix }}.tf"
+    #dest: "{{ tf_module_path }}/{{ file_name_prefix }}{{ item }}{{ file_name_suffix }}.tf"
+    mode: '755'
+  loop: "{{ groups['infrainstances'] }}"
+  when:
+    - item not in vm_skip_list
+    - hostvars[item]['additional_disks'] | d([]) | length > 0
+    - hostvars[item]['attach_additional_disks'] | d(false) | bool 
+- name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Node file | disks instance-out.tf'
+  vars:
+    file_name: "{{ item.split('-')[1] | regex_replace('\\d', '') }}"
+    file_name_suffix: "-disks-out"
+    dir_name_prefix: "{{ item.split('-')[1] | regex_replace('\\d', '') }}"
+    dir_name_suffix: "-node-disks"
+    instance: "{{ item }}"
+  template:
+    src: "templates/terraform/instance-disks-out.tf.j2"
+    dest: "{{ tf_module_path }}/{{ dir_name_prefix }}{{ dir_name_suffix }}/{{ file_name }}{{ file_name_suffix }}.tf"
+    #dest: "{{ tf_module_path }}/{{ file_name }}{{ file_name_suffix }}.tf"
+    mode: '755'
+  loop: "{{ groups['infrainstances'] }}"
+  when:
+    - item not in vm_skip_list
+    - hostvars[item]['additional_disks'] | d([]) | length > 0
+    - hostvars[item]['attach_additional_disks'] | d(false) | bool 
+
+- name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Node file | disks instance.tf'
+  vars:
+    dir_name_prefix: "{{ item.split('-')[1] | regex_replace('\\d', '') }}"
+    dir_name_suffix: "-node-disks"
+    file_name: "{{ item.split('-')[1] | regex_replace('\\d', '') }}"
+    file_name_suffix: "-disks"
+    instance: "{{ item }}"
+  template:
+    src: "templates/terraform/instance-disks.tf.j2"
+    dest: "{{ tf_module_path }}/{{ dir_name_prefix }}{{ dir_name_suffix }}/{{ file_name }}{{ file_name_suffix }}.tf"
+    #dest: "{{ tf_module_path }}/{{ file_name }}{{ file_name_suffix }}.tf"
+    mode: '755'
+  loop: "{{ groups['infrainstances'] }}"
+  when:
+    - item not in vm_skip_list
+    - hostvars[item]['additional_disks'] | d([]) | length > 0
+    - hostvars[item]['attach_additional_disks'] | d(false) | bool 
+
+- name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Node file | disks attachment instance.tf'
+  vars:
+    dir_name_prefix: "{{ item.split('-')[1] | regex_replace('\\d', '') }}"
+    dir_name_suffix: "-node-disks"
+    file_name: "{{ item.split('-')[1] | regex_replace('\\d', '') }}"
+    file_name_suffix: "-disks-attachment"
+    instance: "{{ item }}"
+  template:
+    src: "templates/terraform/instance-disks-attachment.tf.j2"
+    dest: "{{ tf_module_path }}/{{ dir_name_prefix }}{{ dir_name_suffix }}/{{ file_name }}{{ file_name_suffix }}.tf"
+    #dest: "{{ tf_module_path }}/{{ file_name }}{{ file_name_suffix }}.tf"
+    mode: '755'
+  loop: "{{ groups['infrainstances'] }}"
+  when:
+    - item not in vm_skip_list
+    - hostvars[item]['additional_disks'] | d([]) | length > 0
+    - hostvars[item]['attach_additional_disks'] | d(false) | bool 
+
+- name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Node file | disks instance.auto.tfvars'
+  vars:
+    dir_name_prefix: "{{ item.split('-')[1] | regex_replace('\\d', '') }}"
+    dir_name_suffix: "-node-disks"
+    #file_name: "{{ item.split('-')[1] | regex_replace('\\d', '') }}"
+    file_name: "instance"
+    file_name_suffix: "-disks"
+    instance: "{{ item }}"
+  template:
+    src: "templates/terraform/instance-disks.auto.tfvars.j2"
+    dest: "{{ tf_module_path }}/{{ dir_name_prefix }}{{ dir_name_suffix }}/{{ file_name }}{{ file_name_suffix }}.auto.tfvars"
+    #dest: "{{ tf_module_path }}/{{ dir_name_prefix }}{{ dir_name_suffix }}/instance-disks.auto.tfvars"
+    mode: '755'
+  loop: "{{ groups['infrainstances'] }}"
+  when:
+    - item not in vm_skip_list
+    - hostvars[item]['additional_disks'] | d([]) | length > 0
+    - hostvars[item]['attach_additional_disks'] | d(false) | bool 
+- name: '{{ ansible_name_module }} | template | Terraform Ovirt Vars | Node file | disks attachment instance.auto.tfvars'
+  vars:
+    dir_name_prefix: "{{ item.split('-')[1] | regex_replace('\\d', '') }}"
+    dir_name_suffix: "-node-disks"
+    #file_name: "{{ item.split('-')[1] | regex_replace('\\d', '') }}"
+    file_name: "instance"
+    file_name_suffix: "-disks-attachment"
+    instance: "{{ item }}"
+  template:
+    src: "templates/terraform/instance-disks.auto.tfvars.j2"
+    dest: "{{ tf_module_path }}/{{ dir_name_prefix }}{{ dir_name_suffix }}/{{ file_name }}{{ file_name_suffix }}.auto.tfvars"
+    mode: '755'
+  loop: "{{ groups['infrainstances'] }}"
+  when:
+    - item not in vm_skip_list
+    - hostvars[item]['additional_disks'] | d([]) | length > 0
+    - hostvars[item]['attach_additional_disks'] | d(false) | bool 
+

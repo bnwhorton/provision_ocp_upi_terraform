@@ -1,0 +1,14 @@
+---
+# tasks file for build-upi-infra-resources
+- name: '{{ ansible_name_module }} | add_host | import_tasks build-vm.yml'
+  import_tasks: build-vm.yml
+  when:
+    - use_vm_tasks is defined
+    - use_vm_tasks | bool
+
+- name: '{{ ansible_name_module }} | add_host | import_tasks build-vms-and-disks.yml'
+  import_tasks: build-vms-and-disks.yml
+  when:
+    - not use_vm_tasks is defined or ( not use_vm_tasks | bool)
+
+
