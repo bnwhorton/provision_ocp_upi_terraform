@@ -1,0 +1,18 @@
+
+{% if hostvars[instance]['additional_disks'] | d([]) | length > 0 and hostvars[instance]['attach_additional_disks'] | d(false) | bool %}
+{% set dindex = 0 %}
+{% for disk in hostvars[instance]['additional_disks'] %}
+
+module "{{ instance }}-{{ disk.name }}_attachment" {
+  source		= "./modules/disk-attachment"
+  vm_id			= module.{{ instance }}.id 
+  disk_id		= module.{{ instance }}-{{ disk.name }}.disk_id
+  #bootable		= var.bootable
+  #active                = var.active
+  #interface             = var.interface
+  #read_only             = var.read_only
+  #use_scsi_reservation  = var.use_scsi_reservation
+} 
+{% set dindex = dindex + 1 %}
+{% endfor %}
+{% endif %}

@@ -1,0 +1,9 @@
+{% if hostvars[instance]['additional_disks'] | d([]) | length > 0 and hostvars[instance]['attach_additional_disks'] | d(false) | bool %}
+{% set dindex = 0 %}
+{% for disk in hostvars[instance]['additional_disks'] %}
+output "{{ instance }}-{{ disk.name }}_id" {
+  value         = module.{{ instance }}-{{ disk.name }}.disk_id
+}
+{% set dindex = dindex + 1 %}
+{% endfor %}
+{% endif %}

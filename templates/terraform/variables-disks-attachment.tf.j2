@@ -1,0 +1,10 @@
+{% if hostvars[instance]['additional_disks'] | d([]) | length > 0 and hostvars[instance]['attach_additional_disks'] | d(false) | bool %}
+
+variable "active" { default =  "true" }
+variable "bootable" { default =  "false" }
+variable "interface" { default =  "virtio_scsi" }
+variable "read_only" { default =  "false" }
+variable "use_scsi_reservation" { default =  "false" }
+
+{% endif %}
+
