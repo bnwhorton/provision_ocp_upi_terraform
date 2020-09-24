@@ -10,8 +10,10 @@ There is an optional playbook to install Terraform but that is currently install
 **NOTE**
 
 There currently is a bug in RHV/Ovirt whereby the attachment of multiple virtio-iscsi disks fails.
-There are several clodes bugzilla related to the (1819162, 1506677). However it is still happening on RHV 4.3. This does not prevent the playbook from completing since that error is being ignored but need to be further investigated. Also all resources are being creatred but only the root disk and the first additional disk are attached. The others will need to be manaually attached as a workaround for the time being.
-Another error is related to the terraform ovirt provider throwning an error when multiple resources of ovirt_vm resource type are being created. Like in above when given enough time the resources are still provisioned and therefore this error is also being ignored.
+There are several closed bugzilla related to the issue (1819162, 1506677). 
+However it is still happening on RHV 4.3. 
+This does not prevent the playbook from completing since that error is being ignored but need to be further investigated. All resources are being creatred but only the root disk and the first additional disk are attached. The others will need to be manually attached as a workaround for the time being.
+Another error is related to the terraform ovirt provider throwing an error when multiple ovirt_vm resources are being created. When given enough time the resources are all provisioned and therefore this error is also being ignored.
 
  
 ---
