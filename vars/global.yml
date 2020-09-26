@@ -31,6 +31,11 @@ nic_boot_proto:
 #####################################################################################################
 # End of user configurable variables
 #####################################################################################################
+# OpenShift Version
+version_openshift: "{{ lookup('env', 'varVerOpenshift') }}"
+# openshift-install binary to run
+openshift_install_binary: /usr/local/bin/openshift-install
+
 # Bash ENV Lookups
 local_home: "{{ lookup('env', 'HOME') }}"
 local_user: "{{ lookup('env', 'USER') }}"
@@ -57,7 +62,7 @@ registry_auth_file: "{{ dir_secrets }}/docker/config.json }}"
 # SSH Keys
 sshkeys_priv_file: "{{ local_home }}/.ssh/id_rsa_cluster_deploy"
 sshkeys_priv_string: "{{ lookup('file', '{{ sshkeys_priv_file }}') }}"
-sshkeys_pub_file: "{{ dir_secrets }}/ssh/id_rsa_cluster_deploy.pub"
+sshkeys_pub_file: "{{ local_home }}/.ssh//id_rsa_cluster_deploy.pub"
 sshkeys_pub_string: "{{ lookup('file', '{{ sshkeys_pub_file }}') }}"
 
 # Repo Config
@@ -87,3 +92,13 @@ registry_admin_password: ''
 secure_registry: false
 enable_authz_on_registry: true
 generate_selfsigned_registry_certfiles: false
+provision_nginx: true
+ign_repos_name: 'ign-repos'
+nginx_root_directory: "/opt/rh/rh-nginx116/root/usr/share/nginx/html"
+nginx_conf: "/etc/opt/rh/rh-nginx116/nginx/nginx.conf"
+
+# OCP Cluster Config
+ocp_cluster_name: ''
+ocp_cluster_basedomain: ''
+ocp_hosts_cidr: ''
+ocp_registry_pull_secret_file: ''
