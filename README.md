@@ -22,8 +22,9 @@ Another error is related to the terraform ovirt provider throwing an error when 
 
 ### Installing the Collection from Ansible Galaxy
 This is not hosted in galaxy yet. Therefore you will need to clone this repository and then 
-run the ansible-galaxy command to install all required dependencies like 
-`ansible-galaxy install -r requirements -p roles`
+run the ansible-galaxy command to install all required dependencies like for ansible roles.  
+`ansible-galaxy install -r requirements.yml -p roles`
+Use `ansible-galaxy collection install -r requirements.yml` to install collections dependencies.
 
 ### Prerequisites
 It is assumed that you have Terrafom v012 installed and configured on the bastion and that you also have go installed in order to be able to build and run the terraform ovirt provider. For more information on how to install the provider please refer to https://github.com/oVirt/terraform-provider-ovirt.
