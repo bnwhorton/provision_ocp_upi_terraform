@@ -10,4 +10,7 @@
 - import_playbook: dhcp.yml     # Configure a DHCP host if necessary 
 - import_playbook: dns.yml   # Configure a DNS Host if necessary
 - import_playbook: registry.yml   # Configure a Registry host if necessary
+- import_playbook: nginx.yml   # Configure a web server on Registry host if necessary
+- import_playbook: ignition.yml   # Generate and stage ignition config to be pushed to the host
+- import_playbook: publish-ignition.yml   # Publish ignition files to the web server host
   
