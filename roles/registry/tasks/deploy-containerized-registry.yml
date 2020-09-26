@@ -1,0 +1,66 @@
+- name: Intall Containeried docker registry packages
+  yum:
+    name: "{{ container_registry_packages }}"
+    state: present
+
+- name: Create Registry directories 1 of 2
+  file:
+    state: directory
+    path: "{{ registry_auth_dir }}"
+    mode: 0755
+    owner: root
+    group: root
+  when:
+    - registry_auth_dir is defined and registry_auth_dir | length > 0
+
+- name: Create Registry directories 2 of 2
+  file:
+    state: directory
+    path: "{{ registry_data_dir }}"
+    mode: 0755
+    owner: root
+    group: root
+  when:
+    - registry_data_dir is defined and registry_data_dir | length > 0
+
+- name: Copy Systemd Service file onto box to enable the registry pod to be restarted after reboot
+  template: 
+    src: registry-service.j2
+    dest: "/etc/systemd/system/{{ registry_container_name }}.service"
+    group: root
+    owner: root
+    mode: 0755
+
+- name: Stop the container in case it was running from previous runs
+  command: podman stop {{ registry_container_name }}
+  register: container_registry_stopped
+
+- name: Remove the container in case it was running from previous runs
+  command: podman rm {{ registry_container_name }}
+  register: container_registry_removed
+
+- name: Start the Registry Container using Podman
+  command: podman run -d --name {{ registry_container_name }} -p {{ registry_container_port }}:{{ registry_host_port }} --restart=always -v {{ registry_container_name }}:/var/lib/registry:z -v {{ registry_auth_dir }}:/auth:z {% if enable_authz_on_registry | bool %} -e "REGISTRY_AUTH=htpasswd" -e "REGISTRY_AUTH_HTPASSWD_REALM={{ registry_authzrealm }}" -e "REGISTRY_AUTH_HTPASSWD_PATH=/auth/{{ registry_authzfile }}" {% endif %} {% if enable_auth_on_registry | bool %} -v {{ registry_certs_dir }}:/certs:z -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/{{ registry_certfile }} -e REGISTRY_HTTP_TLS_KEY=/certs/{{ registry_certkeyfile }} {{ registry_container_image }} {% endif %}
+  register: container_registry_started
+
+- name: Reload Systemd to that the registry service is loaded
+  systemd:
+    daemon_reload: yes
+  register: systemd_reloaded
+
+- name: Enable the Registry service so that the registry is restarted after a reboot
+  systemd:
+    name: "{{ registry_container_name }}.service"
+    enabled: yes
+  register: registry_service_enabled
+
+- name: Enable fireward for the registry service
+  firewalld:
+    port: "{{ registry_host_port | int }}/tcp" 
+    immediate: yes
+    permanent: yes
+    state: enabled
+
+- name: Test that the registry is up and can be connected to
+  command: podman login -u {{ registry_admin_username }} -p {{ registry_admin_password }} {{ registry_host_fqdn }}:{{ registry_host_port }}
+  register: registry_running
