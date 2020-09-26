@@ -1,0 +1,20 @@
+#!/usr/local/bin/ansible-playbook --inventory=inventory
+- name: ' Konductor | Provision UPI Infra | publish-ignition.yml' 
+  hosts: "{{ nginx_hosts | default(groups.newregistry) }}"
+  become: yes
+  vars_files:
+    - 'vars/global.yml'
+  vars:
+    module: "registry"
+    ansible_name_module: " Konductor | Provision UPI Infra | {{ module }}"
+  tasks:
+    - name: '{{ ansible_name_module }} | copy ignition files to web server '
+      copy:
+        src: "{{ dir_deploy }}/nginx/{{ item }}"
+        dest: "{{ nginx_root_directory }}/{{ ign_repos_name }}/{{ item }}"
+        mode: 0777
+        force: yes
+      loop:
+        - bootstrap.ign
+        - master.ign
+        - worker.ign
