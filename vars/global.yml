@@ -13,6 +13,11 @@ vm_rootpw:
 host_subdomain:
 additional_disks: []
 attach_additional_disks: true
+vm_memory: 16
+vm_cpu_cores: 4
+vm_cpu_sockets: 4
+custom_script: "omit"
+ignition_url: "omit
 
 # Vm Instances to build
 provision_dhcp: false
@@ -102,3 +107,8 @@ ocp_cluster_name: ''
 ocp_cluster_basedomain: ''
 ocp_hosts_cidr: ''
 ocp_registry_pull_secret_file: ''
+ignition_file_hosting_location: ''
+local_repository: 'openshift4'
+registry_host_port: '5000'
+registry_ca_certfile: ''
+
