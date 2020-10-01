@@ -1,34 +1,5 @@
 ---
 # tasks file for setup-terraform-module
-####### Build a host list for instances to be provisioned 
-- name: '{{ ansible_name_module }} | add_host | instance list'
-  add_host:
-    groups: infrainstances
-    hostname: "{{ item }}"
-    vm_name: "{{ item }}"
-    vm_hostname: "{{ item }}.{{ hostvars[item].dns_search }}"
-    inventory_dir: "{{ hostvars[item].inventory_dir }}"
-    ovirt_url: "{{ hostvars[item].ovirt_url }}"
-    ovirt_username: "{{ hostvars[item].ovirt_username }}"
-    ovirt_password: "{{ hostvars[item].ovirt_password }}"
-    vm_template_id: "{{ hostvars[item].vm_template_id }}"
-    cluster_id: "{{ hostvars[item].cluster_id }}"
-    storage_domain_id: "{{ hostvars[item].storage_domain_id }}"
-    vm_memory: "{{ hostvars[item].vm_memory }}"
-    vm_cpu_cores: "{{ hostvars[item].vm_cpu_cores }}"
-    vm_cpu_sockets: "{{ hostvars[item].vm_cpu_sockets }}"
-    vm_dns_servers: "{{ hostvars[item].dns_servers }}"
-    vm_dns_search: "{{ hostvars[item].dns_search }}"
-    nic_boot_proto: "{{ hostvars[item].nic_boot_proto }}"
-    base_domain: "{{ hostvars[item].base_domain }}"
-    vm_host_subdomain: "{{ hostvars[item].host_subdomain }}"
-    vm_host_subdomain: "{{ hostvars[item].host_subdomain }}"
-    vm_rootpw: "{{ hostvars[item].vm_rootpw }}"
-    vm_user: "{{ hostvars[item].vm_user }}"
-    vm_authorized_ssh_key: "{{ hostvars[item].sshkeys_pub_string }}"
-    attach_additional_disks: "{{ hostvars[item].attach_additional_disks | d(false) }}"
-    additional_disks: "{{ hostvars[item].additional_disks | d([]) }}"
-  loop: "{{ groups.all }}"
 
 - name: '{{ ansible_name_module }} | add_host | import_tasks vm.yml'
   import_tasks: vm.yml
