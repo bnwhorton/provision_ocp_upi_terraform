@@ -1,5 +1,5 @@
 
-{% for instance in groups['infrainstances'] %}
+{% for instance in groups['instances'] %}
 {% if not instance in vm_skip_list %}
 output "{{ instance }}_id" {
   value		= module.upi_infra_vms.id

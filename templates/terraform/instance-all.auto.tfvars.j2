@@ -1,4 +1,5 @@
-{% for instance in groups['infrainstances'] %}
+
+{% for instance in groups['instances'] %}
 {% set outer_loop = loop %}
 {% if not instance in vm_skip_list %}
 {% if outer_loop.first %}
@@ -8,7 +9,7 @@ ovirt_password = "{{ hostvars[instance]['ovirt_password'] }}"
 storage_domain_id = "{{ hostvars[instance]['storage_domain_id'] }}"
 cluster_id = "{{ hostvars[instance]['cluster_id'] }}"
 vm_dns_search = "{{ hostvars[instance]['vm_dns_search'] }}"
-vm_dns_servers = "{{ hostvars[instance]['dns_servers'] }}"
+vm_dns_servers = "{{ hostvars[instance]['vm_dns_servers'] }}"
 vm_template_id = "{{ hostvars[instance]['vm_template_id'] }}"
 vm_resources = { 
 {% endif %}
@@ -19,6 +20,9 @@ vm_resources = {
     vm_cores = {{ hostvars[instance]['vm_cpu_cores'] }}
     vm_sockets = {{ hostvars[instance]['vm_cpu_sockets'] }}
     vm_hostname = "{{ hostvars[instance]['vm_hostname'] }}"
+{% if hostvars[instance]['vm_custom_script'] is defined and not hostvars[instance]['vm_custom_script'] == 'omit' %}
+    vm_custom_script = "{{ hostvars[instance]['vm_custom_script'] }}"
+{% endif %}
 {% if hostvars[instance]['additional_disks'] | d([]) | length > 0 and hostvars[instance]['attach_additional_disks'] | d(false) | bool %}
     extra_disks = { 
 {% for disk in hostvars[instance]['additional_disks'] %}
@@ -40,7 +44,7 @@ vm_resources = {
   }
 }
 {% else %}
-{% if groups['infrainstances'][outer_loop.index0 + 1] in vm_skip_list %}
+{% if groups['instances'][outer_loop.index0 + 1] in vm_skip_list %}
 {% if (outer_loop.revindex0 == 1) %}
   }
 }
