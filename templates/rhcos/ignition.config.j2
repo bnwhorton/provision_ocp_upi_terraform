@@ -1,0 +1,32 @@
+{
+  "ignition": {
+    "config": {% raw %}{{% endraw %}{% if hostvars[groups[hgroup][0]]['ignition_url'] is defined and not hostvars[groups[hgroup][0]]['ignition_url'] == 'omit' %}
+
+      "append": [
+        {
+          "source": "{{hostvars[groups[hgroup][0]]['ignition_url']}}",
+          "verification": {}
+        }
+      ]
+    {% endif %}},
+    "security": {
+      "tls": {}
+    },
+    "timeouts": {},
+    "version": "2.2.0"
+  },
+  "networkd": {},
+  "passwd": {% raw %}{{% endraw %}{% if hostvars[groups[hgroup][0]]['sshkeys_pub_string'] | d(authorized_ssh_key) is defined and not hostvars[groups[hgroup][0]]['sshkeys_pub_string'] | d(authorized_ssh_key) == '' %}
+
+    "users": [
+      {
+        "name": "core",
+         "sshAuthorizedKeys": [
+          "{{hostvars[groups[hgroup][0]]['sshkeys_pub_string'] | d(authorized_ssh_key)}}"
+        ]
+      }
+    ]
+  {% endif %}},
+  "storage": {},
+  "systemd": {}
+
