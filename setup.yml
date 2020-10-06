@@ -14,14 +14,12 @@
     tf_module_path: "{{ dir_terraform }}/{{ module }}/{{ instance_type }}"
     ansible_name_module: " Konductor | Provision UPI Infra | {{ module }} | {{ instance_type }}"
     instance_group: "infra"
-    instance_role_groups:
-      - lb
-      - dhcp
-      - dns
-      - registry
+    instance_role_groups: "{{ ['lb','registry'] }}"
     instance_dir_suffix: "-node-search"
+    search_dir_suffix: "node-search"
     instance_file_suffix: "-search"
   vars_files:
     - vars/global.yml
   roles:
-    - setup-terraform-module
+    - { role: setup-terraform-module }
+    #- { role: setup-terraform-module, vm_template_id: "{{ vm_template_id }}" }
