@@ -49,10 +49,6 @@ frontend  kube-api-server
     mode tcp
     option tcplog
 
-backend kube-api-server
-    balance source
-    mode tcp
-
 ### Kubernetes Machine Config Server
 
 frontend  machine-config-server
@@ -61,17 +57,17 @@ frontend  machine-config-server
     mode tcp
     option tcplog
 
-backend machine-config-server
-    balance source
-    mode tcp
-
 ### Kubernetes API Server Backend Config
 backend kube-api-server
     balance source
     mode tcp
+{% if groups['bootstrap'] | d([]) | length == 0 %}
+    server  bootstrap0 localhost:{{ kube_api_port }} check
+{% else %}
 {% for host in groups['bootstrap'] | d([]) and (groups['bootstrap'] | d([]) | length > 0) %}
     server      bootstrap{{ loop.index0 }} {{ host }}:{{ kube_api_port }} check
 {% endfor %}
+{% endif %}
 
 ### For initial config Masters are not configured as backend 
 {% if 'masters' in groups and groups['masters'] | d([]) and (groups['masters'] | d([]) | length > 0) %}
@@ -84,9 +80,13 @@ backend kube-api-server
 backend machine-config-server
     balance source
     mode tcp
+{% if groups['bootstrap'] | d([]) | length == 0 %}
+    server  bootstrap0 localhost:{{ machine_config_server_port }} check
+{% else %}
 {% for host in groups['bootstrap'] | d([]) and (groups['bootstrap'] | d([]) | length > 0) %}
     server      bootstrap{{ loop.index0 }} {{ host }}:{{ machine_config_server_port }} check
 {% endfor %}
+{% endif %}
 
 ### For initial config Masters are not configured as backend 
 {% if 'masters' in groups and groups['masters'] | d([]) and (groups['masters'] | d([]) | length > 0) %}
@@ -115,7 +115,7 @@ backend ingress-apps-http
     mode tcp
 ### For initial config set backend to localhost
 {% if 'workers' not in groups and not groups['workers'] | d([]) and (groups['workers'] | d([]) | length == 0) %}
-    server router1 localhost:443 check
+    server router1 localhost:80 check
 {% else %}
 {% set myindex = 0 %}
 {% for node in groups['workers'] %}
@@ -131,12 +131,12 @@ backend ingress-apps-https
     mode tcp
 ### For initial config set backend to localhost
 {% if 'workers' not  in groups and not groups['workers'] | d([]) and (groups['workers'] | d([]) | length == 0) %}
-    server router1 localhost:80 check
+    server router1 localhost:443 check
 {% else %}
 {% set myindex = 0 %}
 {% for node in groups['workers'] %}
 #{% if hostvars[node].openshift_node_group_name == 'node-config-infra' %}
-    server router{{ myindex }} {{ node }}:80 check
+    server router{{ myindex }} {{ node }}:443 check
 {% set myindex = myindex + 1 %}
 #{% endif %}
 {% endfor %}
