@@ -117,10 +117,8 @@ backend ingress-apps-http
 {% if groups['workers'] | d([]) | length == 0 %}
     server router1 localhost:80 check
 {% else %}
-{% set myindex = 0 %}
 {% for node in groups['workers'] %}
-    server router{{ myindex }} {{ node }}:80 check
-{% set myindex = myindex + 1 %}
+    server router{{ loop.index0 }} {{ node }}:80 check
 {% endfor %}
 {% endif %}
 
@@ -131,9 +129,7 @@ backend ingress-apps-https
 {% if groups['workers'] | d([]) | length == 0 %}
     server router1 localhost:443 check
 {% else %}
-{% set myindex = 0 %}
 {% for node in groups['workers'] %}
-    server router{{ myindex }} {{ node }}:443 check
-{% set myindex = myindex + 1 %}
+    server router{{ loop.index0 }} {{ node }}:443 check
 {% endfor %}
 {% endif %}
