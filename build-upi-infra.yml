@@ -3,10 +3,16 @@
   hosts: local
   #hosts: localhost
   vars:
-    module: "provision-ovirt"
+    module: "ovirt"
+    instance_type: "infra-resources"
     state_provider: "local"
-    tf_module_path: "{{ dir_terraform }}/ovirt"
-    ansible_name_module: " Konductor | Build UPI Infra Resources | {{ module }}"
+    tf_module_path: "{{ dir_terraform }}/{{ module }}/{{ instance_type }}"
+    ansible_name_module: " Konductor | Provision UPI Infra Nodes | {{ module }} | {{ instance_type }}"
+    instance_group: "infra"
+    instance_dir_suffix: "-node-search"
+    search_dir_suffix: "node-search"
+    instance_file_suffix: "-search"
+    instance_inventory_file: "infra"
   vars_files:
     - vars/global.yml
 
@@ -19,4 +25,4 @@
 
   tasks:
   roles:
-    - build-upi-infra-resources 
+    - build-upi-resources 
