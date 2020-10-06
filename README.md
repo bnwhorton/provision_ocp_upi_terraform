@@ -1,4 +1,4 @@
-# Ansible Collection - cadjai.provision_ocp_upi_infra
+# Ansible Collection - cadjai.provision_ocp_upi_terraform
 
 This Ansible collection comprises several roles and plays as well as terraform modules to enable resource provisioning on various platforms.
 The first version will focus on using ovirt and then later use kvm and possibly openstack and any other virtulization platform without official
