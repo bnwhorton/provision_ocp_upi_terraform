@@ -4,16 +4,6 @@
   gather_facts: no
   tasks:
     - setup:
-- name: greate group
-  hosts: all
-  vars:
-    instance_role_groups: "{{ ['bootstrap','masters','workers','infras'] }}" 
-  tasks:
-    #- group_by: "{{ instance_role_groups }}"
-
-    - name: Print groups
-      debug:
-        var: groups
 
 - name: ' Konductor | Provision UPI Infra | Build Ovirt Nodes'
   hosts: localhost
