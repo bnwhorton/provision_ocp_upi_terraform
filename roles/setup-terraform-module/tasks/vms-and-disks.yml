@@ -1,14 +1,5 @@
 ---
 # tasks file for setup-terraform-module
-####### Build a host list for instances to be provisioned 
-- name: Print host groups
-  debug:
-    var: groups
-
-- name: Print host group name
-  debug:
-    var: hostvars[item].group_names
-  loop: "{{ groups.all }}"
 
 ####### Stage Ingintion config custom scripts for host groups if applicable
 - name: '{{ ansible_name_module }} | template | ignition file '
@@ -58,20 +49,6 @@
   loop: "{{ groups.all }}"
   when:
     - hostvars[item].group_names[0] in instance_role_groups
- 
-- name: Print new instance candidates
-  debug:
-    var: item
-  loop: "{{ groups['instances'] }}"
-
-- name: Print new instance infra candidates
-  debug:
-    var: item
-  loop: "{{ groups[instance_group] }}"
-
-#- name: Refresh inventory to ensure newly added hosts and groups are reflected
-#  meta:
-#    refresh_inventory
 
 ####### Stage Terraform ovirt config for each of the required UPI Infra nodes
 - name: '{{ ansible_name_module }} | file | Create directories'
@@ -86,11 +63,6 @@
     src: "files/modules"
     dest: "{{ tf_module_path }}"
     mode: '755'
-
-- name: Print new instance candidates
-  debug:
-    var: item
-  loop: "{{ groups['instances'] }}"
 
 - name: '{{ ansible_name_module }} | template | Terraform Ovirt Provider Vars '
   template:
