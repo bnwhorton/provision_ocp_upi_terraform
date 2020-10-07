@@ -1,16 +1,10 @@
-provider "ovirt" {
-  url = var.ovirt_url
-  username = var.ovirt_username
-  password = var.ovirt_password
-}
-
+{% for instance in groups['instances'] %}
+{% if not instance in vm_skip_list %}
 module "{{ instance }}_vms" {
   source                = "../modules/vm-search"
-  vm_name               = var.vm_name
-  vm_list_name          = var.vm_list_name 
-
+  vm_name               = var.{{ instance }}_vm_name
+  vm_list_name          = var.{{ instance }}_vm_list_name 
 }
-
 output "{{ instance }}_created_vms" {
   value         = module.{{ instance }}_vms.created_vms
 }
@@ -20,3 +14,6 @@ output "{{ instance }}_reported_devices" {
 output "{{ instance }}_created_vm_id" {
   value         = module.{{ instance }}_vms.created_vm_id
 }
+
+{% endif %}
+{% endfor %}
