@@ -9,9 +9,6 @@
     ansible_name_module: " Konductor | Build UPI Infra Resources | {{ module }}"
   tasks:
     - name: '{{ ansible_name_module }} | Install and configure LB'
-      when: 
-        - provision_dhcp is defined
-        - provision_dhcp | bool
       block:
         - name: '{{ ansible_name_module }} | Ensure DHCPD is installed' 
           yum:

@@ -7,14 +7,6 @@
   vars:
     module: "registry"
     ansible_name_module: " Konductor | Provision UPI Infra | {{ module }}"
-  tasks:
-    - name: '{{ ansible_name_module }} | Install and configure Registry' 
-      when: 
-        - provision_registry is defined
-        - provision_registry | bool
-      block:
-        - name: '{{ ansible_name_module }} | Import Registry installation role'
-          include_role:
-            name: registry 
-          register: registry_installed
+  roles:
+    - registry 
 

@@ -9,9 +9,6 @@
     ansible_name_module: "{{ ansible_name }} | {{ module }}"
   tasks:
     - name: '{{ ansible_name_module }} | Install and configure LB'
-      when: 
-        - provision_lb is defined
-        - provision_lb | bool
       block:
         - name: '{{ ansible_name_module }} | Import LB installation role'
           import_role:
