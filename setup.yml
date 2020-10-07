@@ -22,4 +22,3 @@
     - vars/global.yml
   roles:
     - { role: setup-terraform-module }
-    #- { role: setup-terraform-module, vm_template_id: "{{ vm_template_id }}" }
