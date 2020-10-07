@@ -43,7 +43,7 @@ resource "ovirt_vm" "vm" {
   sockets		= each.value["vm_sockets"]
   
   initialization {
-    authorized_ssh_key = "${var.vm_authorized_ssh_key}"
+    authorized_ssh_key = each.value["vm_authorized_ssh_key"]
     host_name		= each.value["vm_hostname"]
     timezone		= "${var.vm_timezone}"
     custom_script	= "${var.vm_custom_script}"

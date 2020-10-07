@@ -20,6 +20,7 @@ vm_resources = {
     vm_cores = {{ hostvars[instance]['vm_cpu_cores'] }}
     vm_sockets = {{ hostvars[instance]['vm_cpu_sockets'] }}
     vm_hostname = "{{ hostvars[instance]['vm_hostname'] }}"
+    vm_authorized_ssh_key = "{{ hostvars[instance]['vm_authorized_ssh_key'] }}"
 {% if hostvars[instance]['vm_custom_script'] is defined and not hostvars[instance]['vm_custom_script'] == 'omit' %}
     vm_custom_script = "{{ hostvars[instance]['vm_custom_script'] }}"
 {% endif %}

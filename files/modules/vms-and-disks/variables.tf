@@ -7,6 +7,7 @@ variable "vm_resources" {
     vm_cores = number
     vm_sockets = number
     vm_hostname = string
+    vm_authorized_ssh_key = string
     extra_disks = map(object({
       disk_name = string
       disk_size = number
@@ -64,10 +65,10 @@ variable "read_only" {
 variable "use_scsi_reservation" {
   default = "false"
 }
-variable "vm_authorized_ssh_key" {
-  description = "The ssh key to use for the vm if applicable"
-  default     = ""
-}
+#variable "vm_authorized_ssh_key" {
+#  description = "The ssh key to use for the vm if applicable"
+#  default     = ""
+#}
 variable "vm_hostname" {
   description = "The hostname of the VM"
   default     = ""
