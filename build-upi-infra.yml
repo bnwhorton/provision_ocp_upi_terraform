@@ -13,6 +13,7 @@
     search_dir_suffix: "node-search"
     instance_file_suffix: "-search"
     instance_inventory_file: "infra"
+    instance_role_groups: "{{ ['lb','registry'] }}"
   vars_files:
     - vars/global.yml
 
@@ -25,4 +26,4 @@
 
   tasks:
   roles:
-    - build-upi-resources 
+    - { role: build-upi-resources, search_vms: 'true' } 

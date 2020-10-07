@@ -21,4 +21,4 @@
   vars_files:
     - vars/global.yml
   roles:
-    - { role: setup-terraform-module }
+    - { role: setup-terraform-module, search_vms: 'true' }
