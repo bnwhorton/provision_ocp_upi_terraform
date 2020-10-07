@@ -11,4 +11,9 @@
   when:
     - not use_vm_tasks is defined or ( not use_vm_tasks | bool)
 
+- name: '{{ ansible_name_module }} | add_host | import_tasks search_vms.yml'
+  import_tasks: search_vms.yml 
+  when:
+    - search_vms is defined 
+    - search_vms | bool
 

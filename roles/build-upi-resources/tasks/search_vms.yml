@@ -1,0 +1,86 @@
+---
+# tasks file for build-upi-infra-resources
+
+- name: Print all instances in group instance
+  debug:
+    var: item
+  loop: "{{ groups['instances'] }}"
+
+- name: Print all instances in group {{ instance_group }} 
+  debug:
+    var: item
+  loop: "{{ groups[instance_group] }}"
+
+####### Terraform Init
+- name: '{{ ansible_name_module }} | shell | terraform init'
+  shell: terraform init
+  args:
+    chdir: "{{ tf_module_path }}/{{ search_dir_suffix }}"
+  with_items:
+    - "{{ tf_module_path }}/{{ search_dir_suffix }}"
+
+####### Terraform Apply
+- name: '{{ ansible_name_module }} | command | terraform | apply'
+  terraform:
+    project_path: "{{ tf_module_path }}/{{ search_dir_suffix }}"
+    force_init: true
+    state: present
+  ignore_errors: true
+  register: tf_apply
+
+- name: '{{ ansible_name_module }} | find | *-node-search '
+  find:
+    file_type: directory
+    patterns:
+      - "*{{ search_dir_suffix }}"
+    paths:
+      - "{{ tf_module_path }}"
+  register: instance_search
+
+- name: '{{ ansible_name_module }} | set_fact | node search paths'
+  set_fact:
+    instance_search_paths: "{{ instance_search.files | map(attribute='path') | list }}"
+
+- name: '{{ ansible_name_module }} | set_fact | Load terraform state files'
+  set_fact:
+    statefiles: "{{ lookup('file', item + '/terraform.tfstate') }}"
+  loop: "{{ instance_search_paths }}"
+
+- name: Set json file fact
+  set_fact:
+    instance_ips: "{{ statefiles_out | json_query(ipquery) }}"
+    instance_names: "{{ statefiles_out | json_query(namequery) }}"
+    instances: "{{ statefiles_out | json_query(query) }}"
+  vars:
+    ipquery: "results[*].ansible_facts.*.resources[][*].instances[][].attributes.* | [][].reported_devices[?name=='eth0'].ips[][?version=='v4'].address[]"
+    namequery: "results[*].ansible_facts.*.resources[][*].instances[][].attributes.* | [][].name"
+    query: "results[*].ansible_facts.*.resources[][*].instances[][].attributes.* | { name: [][].name, ipaddr: [][].reported_devices[?name=='eth0'].ips[][?version=='v4'].address[]}"
+  register: statejdata_out
+
+- name: Set inventory format
+  set_fact:
+    new_instance_group: "{{ dict(instance_names | zip (instance_ips)) }}"
+
+- name: ' | add_host | create in memory host group to run subsequent plays'
+  add_host:
+    name: "{{ item.key }}"
+    groups:
+      - "{{ 'new' + (item.key.split('-')[1] | regex_replace('\\d','')) }}"
+      - "{{ instance_group }}"
+    ansible_user: "{{ hostvars[item.key]['vm_user'] | d(ansible_user) }}"
+    ansible_ssh_user: "{{ hostvars[item.key]['vm_user'] | d(ansible_user) }}"
+    ansible_sudo_pass: "{{ hostvars[item.key]['vm_rootpw'] | d(vm_rootpw) }}"
+    ansible_become_pass: "{{ hostvars[item.key]['vm_rootpw'] | d(vm_rootpw) }}"
+    ansible_ssh_pass: "{{ hostvars[item.key]['vm_rootpw'] | d(vm_rootpw) }}"
+    instance_name: "{{ item.key }}"
+    ansible_host: "{{ item.value }}"
+    ansible_connection: 'ssh'
+  loop: "{{ new_instance_group | dict2items }}"
+  register: hostadd_out
+
+- name:
+  template:
+    src: "templates/inventory/instances.j2"
+    dest: "{{ inventory_dir }}/{{ instance_inventory_file }}"
+    mode: '755'
+
