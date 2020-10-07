@@ -1,6 +1,6 @@
 #!/usr/local/bin/ansible-playbook --inventory=inventory
 - name: '{{ name_vendor }} | Koffer | dns-client.yml' 
-  hosts: groups.instances 
+  hosts: "{{ target | d('new*') }}" 
   become: true
   vars_files:
     - 'vars/global.yml'
