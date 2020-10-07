@@ -1,6 +1,16 @@
 ---
 # tasks file for build-upi-infra-resources
 
+- name: Print all instances in group instance
+  debug:
+    var: item
+  loop: "{{ groups['instances'] }}"
+
+- name: Print all instances in group {{ instance_group }} 
+  debug:
+    var: item
+  loop: "{{ groups[instance_group] }}"
+
 ####### Terraform Init
 - name: '{{ ansible_name_module }} | shell | terraform init'
   shell: terraform init
@@ -28,4 +38,29 @@
   wait_for:
     timeout: 600
   delegate_to: localhost
+
+- name: ' | add_host | create in memory host group to run subsequent plays'
+  add_host:
+    name: "{{ item }}"
+    groups:
+      - "{{ 'new' + (item.split('-')[1] | regex_replace('\\d','')) }}"
+    ansible_user: "{{ hostvars[item]['vm_user'] | d(ansible_user) }}"
+    ansible_ssh_user: "{{ hostvars[item]['vm_user'] | d(ansible_user) }}"
+    ansible_sudo_pass: "{{ hostvars[item]['vm_rootpw'] | d(vm_rootpw) }}"
+    ansible_become_pass: "{{ hostvars[item]['vm_rootpw'] | d(vm_rootpw) }}"
+    ansible_ssh_pass: "{{ hostvars[item]['vm_rootpw'] | d(vm_rootpw) }}"
+    instance_name: "{{ item }}"
+    ansible_host: "{{ item }}"
+    ansible_connection: 'ssh'
+    vm_hostname: "{{ hostvars[item]['vm_hostname'] }}"
+  loop: "{{ groups[instance_group] }}"
+  register: hostadd_out
+
+- name:
+  #vars:
+  #  instances: "{{ instance_group }}"
+  template:
+    src: "templates/inventory/instances.j2"
+    dest: "{{ inventory_dir }}/{{ instance_inventory_file }}"
+    mode: '755'
 
