@@ -18,8 +18,9 @@
     instance_dir_suffix: "-node-search"
     search_dir_suffix: "node-search"
     instance_file_suffix: "-search"
+    static_inventory_file: "inventory-cluster"
     
   vars_files:
     - vars/global.yml
   roles:
-    - { role: setup-terraform-module, vm_template_id: "{{ coreos_vm_template_id }}" }
+    - { role: setup-terraform-module, vm_template_id: "{{ coreos_vm_template_id }}", create_cluster_inventory: "true" }

@@ -13,7 +13,7 @@ vm_dns_servers = "{{ hostvars[instance]['vm_dns_servers'] }}"
 vm_template_id = "{{ hostvars[instance]['vm_template_id'] }}"
 vm_resources = { 
 {% endif %}
-  {{ instance }} = {
+  {{ instance.split('.')[0] }} = {
     vm_name = "{{ hostvars[instance]['vm_name'] }}"
     vm_memory = "{{ hostvars[instance]['vm_memory'] }}"
     vm_template_id = "{{ hostvars[instance]['vm_template_id'] }}"
