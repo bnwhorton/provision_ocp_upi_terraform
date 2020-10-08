@@ -7,5 +7,10 @@
   vars:
     module: "dnsclients"
     ansible_name_module: "{{ ansible_name }} | {{ module }}"
-  roles:
-    - ipaclient
+  tasks:
+    - name: Include role if appropriate
+      include_role: 
+        name: ipaclient
+      when:
+        - register_client_with_freeipa is defined
+        - register_client_with_freeipa | bool 

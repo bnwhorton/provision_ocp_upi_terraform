@@ -1,18 +1,18 @@
 ---
 # tasks file for setup-terraform-module
 
-- name: '{{ ansible_name_module }} | add_host | include_tasks vm.yml'
+- name: '{{ ansible_name_module }} | setup-terraform-module | include_tasks vm.yml'
   include_tasks: vm.yml
   when: 
     - use_vm_tasks is defined
     - use_vm_tasks | bool 
 
-- name: '{{ ansible_name_module }} | add_host | include_tasks vms-and-disks.yml'
+- name: '{{ ansible_name_module }} | setup-terraform-module | include_tasks vms-and-disks.yml'
   include_tasks: vms-and-disks.yml 
   when: 
     - not use_vm_tasks is defined or ( not use_vm_tasks | bool)
 
-- name: '{{ ansible_name_module }} | add_host | include_tasks vm-search.yml'
+- name: '{{ ansible_name_module }} | setup-terraform-module | include_tasks vm-search.yml'
   include_tasks: vm-search.yml 
   when: 
     - search_vms is defined 
