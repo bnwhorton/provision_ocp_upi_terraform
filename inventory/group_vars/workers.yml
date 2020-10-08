@@ -3,4 +3,5 @@ vm_cpu_sockets: 2
 vm_memory: 8192
 custom_script: "/tmp/worker-custom-script.json"
 custom_script_string: "{{ lookup('file', '{{ custom_script }}') }}"
-ignition_url: ""
+ignition_file_suffix: worker.ign
+ignition_url: "{{ ignition_file_hosting_url }}/{{ ign_repos_name }}/{{ignition_file_suffix }}"
