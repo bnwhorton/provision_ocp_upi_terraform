@@ -4,7 +4,7 @@
 
       "append": [
         {
-          "source": "{{ ignition_file_hosting_url }}/{{hostvars[groups[hgroup][0]]['ignition_file_suffix']}}",
+          "source": "{{ ignition_file_hosting_url }}/{{ ign_repos_name }}/{{hostvars[groups[hgroup][0]]['ignition_file_suffix']}}",
           "verification": {}
         }
       ]
