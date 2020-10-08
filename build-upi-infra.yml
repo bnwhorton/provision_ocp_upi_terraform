@@ -1,7 +1,6 @@
 #!/usr/local/bin/ansible-playbook --inventory=inventory
 - name: ' Konductor | Provision-upi-infra | Build Infra Resources'
   hosts: local
-  #hosts: localhost
   vars:
     module: "ovirt"
     instance_type: "infra-resources"
@@ -24,6 +23,5 @@
     #    name: python2-jmespath
     #    state: present
 
-  tasks:
   roles:
     - { role: build-upi-resources, search_vms: 'true' } 

@@ -1,7 +1,6 @@
 #!/usr/local/bin/ansible-playbook --inventory=inventory
 - name: ' Konductor | Provision-upi-infra | Build Cluster Resources'
   hosts: local
-  #hosts: localhost
   vars:
     module: "ovirt"
     instance_type: "cluster-resources"
@@ -13,6 +12,7 @@
     search_dir_suffix: "node-search"
     instance_file_suffix: "-search"
     instance_inventory_file: "cluster"
+    instance_role_groups: "{{ ['bootstrap','masters','workers'] }}"
   vars_files:
     - vars/global.yml
 
@@ -23,6 +23,5 @@
     #    name: python2-jmespath
     #    state: present
 
-  tasks:
   roles:
-    - build-upi-resources 
+    - { role: build-upi-resources }
