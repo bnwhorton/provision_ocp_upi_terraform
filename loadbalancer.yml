@@ -72,6 +72,11 @@
             - 80/tcp
             - 9000/tcp
 
+        - name: '{{ ansible_name_module }} | Enable the HAProxy service'
+          systemd:
+            name: haproxy
+            enabled: true
+
         - name: '{{ ansible_name_module }} | Restart the HAProxy service'
           systemd:
             name: haproxy
