@@ -41,10 +41,10 @@
     vm_host_subdomain: "{{ host_subdomain }}"
     vm_rootpw: "{{ vm_rootpw }}"
     vm_user: "{{ vm_user }}"
-    vm_authorized_ssh_key: "{{ hostvars[item].sshkeys_pub_string | d(authorized_ssh_key) }}"
+    vm_authorized_ssh_key: "{{ hostvars[item].authorized_ssh_key | d(authorized_ssh_key) }}"
     attach_additional_disks: "{{ hostvars[item].attach_additional_disks | d(false) }}"
     additional_disks: "{{ hostvars[item].additional_disks | d([]) }}"
-    vm_custom_script: "{{ hostvars[item].custom_script_string | d(omit) }}"
+    vm_custom_script: "{{ hostvars[item].custom_script | d(omit) }}"
     ignition_url: "{{ hostvars[item].ignition_url | d(ignition_url) }}"
   loop: "{{ groups.all }}"
   when:
