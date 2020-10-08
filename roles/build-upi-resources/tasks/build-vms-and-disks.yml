@@ -36,6 +36,6 @@
 
 - name: '{{ ansible_name_module }} | command | wait for all vms to be created before running next tasks'
   wait_for:
-    timeout: 600
+    timeout: 300
   delegate_to: localhost
 
