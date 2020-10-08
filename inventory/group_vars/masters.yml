@@ -1,7 +1,6 @@
 vm_cpu_cores: 4
 vm_cpu_sockets: 4
 vm_memory: 16384
+ignition_file_suffix: "master.ign"
 custom_script: "/tmp/master-custom-script.json"
 custom_script_string: "{{ lookup('file', '{{ custom_script }}') }}"
-ignition_file_suffix: master.ign
-ignition_url: "{{ ignition_file_hosting_url }}/{{ ign_repos_name }}/{{ignition_file_suffix }}"

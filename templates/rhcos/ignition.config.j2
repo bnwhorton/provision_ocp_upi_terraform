@@ -1,10 +1,10 @@
 {
   "ignition": {
-    "config": {% raw %}{{% endraw %}{% if hostvars[groups[hgroup][0]]['ignition_url'] is defined and not hostvars[groups[hgroup][0]]['ignition_url'] == 'omit' %}
+    "config": {% raw %}{{% endraw %}{% if hostvars[groups[hgroup][0]]['ignition_file_suffix'] is defined and not hostvars[groups[hgroup][0]]['ignition_file_suffix'] == '' %}
 
       "append": [
         {
-          "source": "{{hostvars[groups[hgroup][0]]['ignition_url']}}",
+          "source": "{{ ignition_file_hosting_url }}/{{hostvars[groups[hgroup][0]]['ignition_file_suffix']}}",
           "verification": {}
         }
       ]
