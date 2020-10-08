@@ -1,5 +1,5 @@
 #!/usr/local/bin/ansible-playbook --inventory=inventory
-- name: 'RedHat | Konductor | site.yml'
+- name: 'RedHat | Konductor | provision-cluster.yml'
   hosts: localhost
 
 - import_playbook: setup-cluster-resources.yml   # Setup Terraform to provision UPI cluster resources

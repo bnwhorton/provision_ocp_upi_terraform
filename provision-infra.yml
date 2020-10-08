@@ -1,5 +1,5 @@
 #!/usr/local/bin/ansible-playbook --inventory=inventory
-- name: 'RedHat | Konductor | site.yml'
+- name: 'RedHat | Konductor | provision-infra.yml'
   hosts: localhost
 
 - import_playbook: setup-infra-resources.yml        # Configure Terraform modules for the UPI infra nodes
