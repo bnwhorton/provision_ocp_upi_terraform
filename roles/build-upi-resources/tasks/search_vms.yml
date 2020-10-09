@@ -1,5 +1,10 @@
 ---
 # tasks file for build-upi-infra-resources
+### adding extra timeout here to wait for nodes to be created
+- name: '{{ ansible_name_module }} | command | wait for all vms to be created before running next tasks'
+  wait_for:
+    timeout: 150
+  delegate_to: localhost
 ####### Terraform Init
 - name: '{{ ansible_name_module }} | shell | terraform init | VM Search'
   shell: terraform init
