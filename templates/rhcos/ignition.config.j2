@@ -1,10 +1,10 @@
 {
   "ignition": {
-    "config": {% raw %}{{% endraw %}{% if hostvars[groups[hgroup][0]]['ignition_file_suffix'] is defined and not hostvars[groups[hgroup][0]]['ignition_file_suffix'] == '' %}
+    "config": {% raw %}{{% endraw %}{% if hostvars[host]['ignition_file_suffix'] is defined and not hostvars[host]['ignition_file_suffix'] == '' %}
 
       "append": [
         {
-          "source": "{{ ignition_file_hosting_url }}/{{ ign_repos_name }}/{{hostvars[groups[hgroup][0]]['ignition_file_suffix']}}",
+          "source": "{{ ignition_file_hosting_url }}/{{ ign_repos_name }}/{{hostvars[host]['ignition_file_suffix']}}",
           "verification": {}
         }
       ]
@@ -16,17 +16,27 @@
     "version": "2.2.0"
   },
   "networkd": {},
-  "passwd": {% raw %}{{% endraw %}{% if hostvars[groups[hgroup][0]]['sshkeys_pub_string'] | d(authorized_ssh_key) is defined and not hostvars[groups[hgroup][0]]['sshkeys_pub_string'] | d(authorized_ssh_key) == '' %}
+  "passwd": {% raw %}{{% endraw %}{% if hostvars[host]['sshkeys_pub_string'] | d(authorized_ssh_key) is defined and not hostvars[host]['sshkeys_pub_string'] | d(authorized_ssh_key) == '' %}
 
     "users": [
       {
         "name": "core",
          "sshAuthorizedKeys": [
-          "{{hostvars[groups[hgroup][0]]['sshkeys_pub_string'] | d(authorized_ssh_key)}}"
+          "{{hostvars[host]['sshkeys_pub_string'] | d(authorized_ssh_key)}}"
         ]
       }
     ]
   {% endif %}},
-  "storage": {},
+  "storage": {% raw %}{{% endraw %}{% if ocp_cluster_basedomain is defined and not ocp_cluster_basedomain == '' %} 
+     
+    "files": [
+      {
+        "filesystem": "root",
+        "path": "/etc/hostname",
+        "mode": 420,
+        "contents": { "source": "data:,{{host + '.' + ocp_cluster_basedomain}}" }
+      }
+    ]
+  {% endif %}},
   "systemd": {}
 

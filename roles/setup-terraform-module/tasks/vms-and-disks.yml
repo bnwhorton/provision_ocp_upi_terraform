@@ -4,17 +4,17 @@
 ####### Stage Ingintion config custom scripts for host groups if applicable
 - name: '{{ ansible_name_module }} | template | ignition file '
   vars:
-    hgroup: "{{ item }}"
+    host: "{{ item }}"
+    #hgroup: "{{ item }}"
   template:
     src: "templates/rhcos/ignition.config.j2"
-    dest: "{{ hostvars[groups[item][0]]['custom_script'] }}"
+    dest: "{{ (hostvars[item].custom_script | dirname) + '/' + item + '-' + (hostvars[item].custom_script | basename) }}"
     force: yes 
-  loop: "{{ instance_role_groups }}"
+  loop: "{{ groups.all }}"
   when:
-    - item not in vm_skip_list
-    - groups[item] is defined
-    - groups[item] | length > 0
-    - hostvars[groups[item][0]]['custom_script'] is defined
+    - not hostvars[item].group_names[0] in vm_skip_list
+    - hostvars[item].group_names[0] in instance_role_groups
+    - hostvars[item]['custom_script'] is defined
 
 - name: '{{ ansible_name_module }} | add_host | instance list'
   add_host:
@@ -44,7 +44,7 @@
     vm_authorized_ssh_key: "{{ hostvars[item].authorized_ssh_key | d(authorized_ssh_key) }}"
     attach_additional_disks: "{{ hostvars[item].attach_additional_disks | d(false) }}"
     additional_disks: "{{ hostvars[item].additional_disks | d([]) }}"
-    vm_custom_script: "{{ hostvars[item].custom_script | d(omit) }}"
+    vm_custom_script: "{{ omit if not hostvars[item].custom_script is defined else (hostvars[item].custom_script | dirname) + '/' + item + '-' + (hostvars[item].custom_script | basename) }}"
     ignition_url: "{{ hostvars[item].ignition_url | d(ignition_url) }}"
   loop: "{{ groups.all }}"
   when:
