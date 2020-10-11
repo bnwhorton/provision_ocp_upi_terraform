@@ -8,6 +8,15 @@
     module: "registry"
     ansible_name_module: " Konductor | Provision UPI Infra | {{ module }}"
   tasks:
+    - name: '{{ ansible_name_module }} | file:absent | remove existing ignition files from web server '
+      file: 
+        path: "{{ nginx_root_directory }}/{{ ign_repos_name }}/{{ item }}"
+        state: absent
+      loop:
+        - bootstrap.ign
+        - master.ign
+        - worker.ign
+
     - name: '{{ ansible_name_module }} | copy ignition files to web server '
       copy:
         src: "{{ dir_deploy }}/nginx/{{ item }}"
