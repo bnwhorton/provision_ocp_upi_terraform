@@ -25,6 +25,14 @@
     - "{{ dir_deploy }}/cluster"
     - "{{ dir_deploy }}/configs"
 
+- name: '{{ ansible_name_module }} | shell:rm | Ensure the ignition directories are empty'
+  shell: rm -rf {{ item }}/*
+  loop:
+    - "{{ dir_deploy }}/cluster"
+    - "{{ dir_deploy }}/configs"
+    - "{{ dir_deploy }}/nginx/"
+  ignore_errors: true
+
 - name: '{{ ansible_name_module }} | template | Copy install-config.yml into place'
   template:
     src: install-config.yaml.j2 
