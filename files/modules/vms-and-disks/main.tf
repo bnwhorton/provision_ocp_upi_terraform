@@ -46,7 +46,7 @@ resource "ovirt_vm" "vm" {
     authorized_ssh_key = each.value["vm_authorized_ssh_key"]
     host_name		= each.value["vm_hostname"]
     timezone		= "${var.vm_timezone}"
-    custom_script	= "${var.vm_custom_script}"
+    custom_script	= each.value["vm_custom_script"]
     dns_search		= "${var.vm_dns_search}"
     dns_servers		= "${var.vm_dns_servers}"
     

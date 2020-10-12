@@ -8,6 +8,7 @@ variable "vm_resources" {
     vm_sockets = number
     vm_hostname = string
     vm_authorized_ssh_key = string
+    vm_custom_script = string
     extra_disks = map(object({
       disk_name = string
       disk_size = number
@@ -65,10 +66,6 @@ variable "read_only" {
 variable "use_scsi_reservation" {
   default = "false"
 }
-#variable "vm_authorized_ssh_key" {
-#  description = "The ssh key to use for the vm if applicable"
-#  default     = ""
-#}
 variable "vm_hostname" {
   description = "The hostname of the VM"
   default     = ""
@@ -79,10 +76,6 @@ variable "vm_timezone" {
 }
 variable "vm_user_name" {
   description = "The username for the VM"
-  default     = ""
-}
-variable "vm_custom_script" {
-  description = "Custom script used for the initialization of the VM through cloud-init"
   default     = ""
 }
 variable "vm_dns_search" {
