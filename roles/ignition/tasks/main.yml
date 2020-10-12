@@ -20,3 +20,9 @@
 
 - name: '{{ ansible_name_module }} | include_tasks | nginx.yml'
   include_tasks: nginx.yml
+
+- name: '{{ ansible_name_module }} | include_tasks | prepare-rhcos-images.yml'
+  include_tasks: prepare-rhcos-images.yml
+  when:
+    - host_rhcos_images is defined
+    - host_rhcos_images | bool

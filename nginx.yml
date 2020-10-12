@@ -13,7 +13,6 @@
         - provision_nginx is defined
         - provision_nginx | bool
       block:
-
         - name: '{{ ansible_name_module }} | Install Nginx available in repo '
           yum:
             #name: "{{ nginx_version | d ('rh-nginx116') }}"
@@ -36,6 +35,15 @@
             path: "{{ nginx_root_directory }}/{{ ign_repos_name }}"
             state: directory
             mode: 755
+
+        - name: '{{ ansible_name_module }} | file |  rhcos-isos '
+          file:
+            path: "{{ nginx_root_directory }}/{{ ign_iso_repos_name }}"
+            state: directory
+            mode: 755
+          when:
+            - host_rhcos_images is defined
+            - host_rhcos_images | bool
 
         - name: '{{ ansible_name_module }} | Ensure Nginx Service is started and enabled '
           systemd:

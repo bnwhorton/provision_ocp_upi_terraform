@@ -7,6 +7,7 @@
   vars:
     module: "registry"
     ansible_name_module: " Konductor | Provision UPI Infra | {{ module }}"
+    host_rhcos_images: false
   tasks:
     - name: '{{ ansible_name_module }} | file:absent | remove existing ignition files from web server '
       file: 
@@ -27,3 +28,16 @@
         - bootstrap.ign
         - master.ign
         - worker.ign
+
+    - name: '{{ ansible_name_module }} | copy image files to web server '
+      copy:
+        src: "{{ dir_deploy }}/nginx-images/{{ item }}"
+        dest: "{{ nginx_root_directory }}/{{ ign_repos_name }}/{{ item }}"
+        mode: 0777
+        force: yes
+      loop:
+        - "{{ rhcos_image_iso_name }}"
+        #- "{{ rhcos_image_raw_name }}"
+      when:
+        - host_rhcos_images is defined
+        - host_rhcos_images | bool 

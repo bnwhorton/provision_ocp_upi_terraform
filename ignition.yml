@@ -9,4 +9,4 @@
     module: "ignition"
     ansible_name_module: "{{ ansible_name }} | {{ module }}"
   roles:
-    - ignition
+    - { role: ignition, host_rhcos_images: 'false' } 
