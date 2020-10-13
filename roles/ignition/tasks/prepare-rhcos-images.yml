@@ -12,7 +12,6 @@
     dest: "{{ dir_deploy }}/nginx-images/{{ item }}"
     url: "{{ rhcos_image_mirror }}/{{rhcos_image_version_major}}/{{rhcos_image_version_minor}}/{{ item }}"
     validate_certs: false
-  loop:
-    - "{{ rhcos_image_iso_name }}"
-    #- "{{ rhcos_image_raw_name }}"
+    force: yes
+  loop: "{{ rhcos_image_iso_names }}"
 
