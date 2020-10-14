@@ -29,9 +29,14 @@
     
     - name: '{{ ansible_name_module }} | set_fact | template_id and template_name from json file '
       set_fact:
-        generated_coreos_template_id: "{{ statefiles_set | json_query(idquery) }}"
-        generated_coreos_template_name: "{{ statefiles_set | json_query(namequery) }}"
+        template_ids: "{{ statefiles_set | json_query(idquery) }}"
+        template_names: "{{ statefiles_set | json_query(namequery) }}"
       vars:
         idquery: "ansible_facts.statefiles.resources[?type=='ovirt_templates'].instances[0].attributes.templates[0].id"
         namequery: "ansible_facts.statefiles.resources[?type=='ovirt_templates'].instances[0].attributes.templates[0].name"
       register: statejdata_out
+
+    - name: '{{ ansible_name_module }} | set_fact | final template_id and template_name facts '
+      set_fact:
+        generated_coreos_template_id: "{{ template_ids[0] | quote }}"
+        generated_coreos_template_name: "{{ template_names[0] | quote }}"
