@@ -26,5 +26,4 @@
     - { mode: '755', name: "templates/terraform/variables-search.tf.j2", dest: "{{ tf_module_path }}/{{ search_dir_suffix }}/variables.tf"}
     - { mode: '755', name: "templates/terraform/instance-search.auto.tfvars.j2", dest: "{{ tf_module_path }}/{{ search_dir_suffix }}/instance-all.auto.tfvars"}
     - { mode: '755', name: "templates/terraform/instance-search.tf.j2", dest: "{{ tf_module_path }}/{{ search_dir_suffix }}/instance-all.tf"}
-    #- { mode: '755', name: "templates/terraform/", dest: "{{ tf_module_path }}/{{ search_dir_suffix }}/instance-out-all.tf"}
 
