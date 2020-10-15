@@ -6,6 +6,7 @@ ovirt_password:
 storage_domain_id:
 cluster_id:
 vm_template_id:
+coreos_vm_template_id:
 dns_search:
 dns_servers:
 vm_user:
@@ -13,17 +14,13 @@ vm_rootpw:
 host_subdomain:
 additional_disks: []
 attach_additional_disks: true
-vm_memory: 16
-vm_cpu_cores: 4
-vm_cpu_sockets: 4
+vm_memory: 2048 
+vm_cpu_cores: 2
+vm_cpu_sockets: 2
 custom_script: "omit"
 ignition_url: "omit
 
 # Vm Instances to build
-provision_dhcp: false
-provision_dns: false
-provision_lb: true
-provision_registry: true
 authorized_ssh_key: "{{ sshkeys_pub_string }}"
 #Vm to skip
 vm_skip_list:
@@ -73,7 +70,7 @@ sshkeys_pub_string: "{{ lookup('file', '{{ sshkeys_pub_file }}') }}"
 # Repo Config
 use_statellite: false
 satellite_server: ''
-yum_repo_file: 'files/yum.repo'
+yum_repo_file: ''
 
 # DNS Client Config
 ipaclient_servers: ''
@@ -99,6 +96,7 @@ enable_authz_on_registry: true
 generate_selfsigned_registry_certfiles: false
 provision_nginx: true
 ign_repos_name: 'ign-repos'
+ign_iso_repos_name: 'rhcos-isos'
 nginx_root_directory: "/opt/rh/rh-nginx116/root/usr/share/nginx/html"
 nginx_conf: "/etc/opt/rh/rh-nginx116/nginx/nginx.conf"
 
@@ -110,5 +108,16 @@ ocp_registry_pull_secret_file: ''
 ignition_file_hosting_location: ''
 local_repository: 'openshift4'
 registry_host_port: '5000'
-registry_ca_certfile: ''
-
+registra_ca_local_dir: "{{ dir_deploy }}/registry"
+registry_ca_local_name: "registry-ca.crt"
+ignition_file_hosting_url:
++ocp_master_count: 3
++ocp_worker_count: 2
+rhcos_image_mirror: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos"
+rhcos_image_version_major: "4.5"
+rhcos_image_version_minor: "latest"
+rhcos_image_iso_names:
+  - "rhcos-openstack.x86_64.qcow2.gz"
+  - "rhcos-installer.x86_64.iso"
+rhcos_image_url: "http://{{ nginx_hosts[0] | d(groups.newregistry[0]) }}.{{ ocp_cluster_basedomain }}/{{ ign_iso_repos_name }}/{{ rhcos_template_image_name }}"
+create_rhcos_template: true
