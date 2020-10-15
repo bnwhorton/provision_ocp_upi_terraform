@@ -69,5 +69,6 @@
       command:
         cmd: gzip -d {{ item }}
         chdir: "{{ item | dirname }}"
+      loop: "{{ qcow2_files }}"
       when:
         - qcow2_files is defined
