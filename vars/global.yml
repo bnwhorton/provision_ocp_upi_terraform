@@ -121,3 +121,6 @@ rhcos_image_iso_names:
   - "rhcos-installer.x86_64.iso"
 rhcos_image_url: "http://{{ nginx_hosts[0] | d(groups.newregistry[0]) }}.{{ ocp_cluster_basedomain }}/{{ ign_iso_repos_name }}/{{ rhcos_template_image_name }}"
 create_rhcos_template: true
+oc_client_binary: ""
+ocp_release_version: 4.5.8
+
