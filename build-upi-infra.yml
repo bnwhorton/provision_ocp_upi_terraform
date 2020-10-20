@@ -16,12 +16,5 @@
   vars_files:
     - vars/global.yml
 
-  pre_tasks:
-    #- name: Ensure the right version of python is installed on host
-    #  become: true
-    #  yum:
-    #    name: python2-jmespath
-    #    state: present
-
   roles:
     - { role: build-upi-resources, search_vms: 'true' } 
